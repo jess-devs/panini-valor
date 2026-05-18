@@ -65,9 +65,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ════════════════════════════════════════════════
-   OVERLAY
-════════════════════════════════════════════════ */
 #overlay {
   position: fixed;
   inset: 0;
@@ -155,9 +152,6 @@ body {
   font-weight: 500;
 }
 
-/* ════════════════════════════════════════════════
-   HEADER
-════════════════════════════════════════════════ */
 header {
   background: var(--navy);
   padding: 0 24px;
@@ -230,9 +224,6 @@ header {
   opacity: .8;
 }
 
-/* ════════════════════════════════════════════════
-   MAIN LAYOUT
-════════════════════════════════════════════════ */
 main {
   flex: 1;
   max-width: 840px;
@@ -241,9 +232,6 @@ main {
   padding: 40px 20px 80px;
 }
 
-/* ════════════════════════════════════════════════
-   SEARCH SECTION
-════════════════════════════════════════════════ */
 .search-section {
   margin-bottom: 32px;
 }
@@ -302,9 +290,6 @@ main {
   font-weight: 400;
 }
 
-/* ════════════════════════════════════════════════
-   RESULTS GRID
-════════════════════════════════════════════════ */
 #results {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -320,9 +305,6 @@ main {
   font-size: .95rem;
 }
 
-/* ════════════════════════════════════════════════
-   PLAYER CARD
-════════════════════════════════════════════════ */
 .card {
   background: var(--white);
   border-radius: var(--radius);
@@ -353,7 +335,6 @@ main {
   }
 }
 
-/* Photo */
 .player-photo-wrap {
   position: relative;
   flex-shrink: 0;
@@ -404,7 +385,6 @@ main {
   display: block;
 }
 
-/* Body */
 .card-body {
   flex: 1;
   min-width: 0;
@@ -466,7 +446,6 @@ main {
   line-height: 1.1;
 }
 
-/* Add button */
 .add-btn {
   flex-shrink: 0;
   width: 36px;
@@ -500,9 +479,6 @@ main {
   background: #c8890e;
 }
 
-/* ════════════════════════════════════════════════
-   CART SECTION
-════════════════════════════════════════════════ */
 #cart-section {
   background: var(--white);
   border-radius: var(--radius-lg);
@@ -567,7 +543,6 @@ main {
   color: var(--danger);
 }
 
-/* Empty state */
 .cart-empty-state {
   display: none;
   flex-direction: column;
@@ -588,7 +563,6 @@ main {
   display: none;
 }
 
-/* Table */
 .cart-table-wrap {
   overflow-x: auto;
 }
@@ -629,7 +603,6 @@ main {
   background: #fafbfd;
 }
 
-/* Player cell */
 .cart-player-cell {
   display: flex;
   align-items: center;
@@ -692,7 +665,6 @@ main {
   font-size: .88rem;
 }
 
-/* Other cells */
 .cart-country-cell {
   font-size: .82rem;
   color: var(--text-muted);
@@ -733,7 +705,6 @@ main {
   white-space: nowrap;
 }
 
-/* Delete button */
 .del-btn {
   background: none;
   border: none;
@@ -752,7 +723,6 @@ main {
   background: #fef2f2;
 }
 
-/* Footer / subtotal */
 .cart-table tfoot td {
   padding: 14px 16px;
   background: var(--surface);
@@ -777,9 +747,6 @@ main {
   white-space: nowrap;
 }
 
-/* ════════════════════════════════════════════════
-   MODAL
-════════════════════════════════════════════════ */
 #modal {
   position: fixed;
   inset: 0;
@@ -981,9 +948,6 @@ main {
   background: var(--surface-2);
 }
 
-/* ════════════════════════════════════════════════
-   HEADER ACTIONS
-════════════════════════════════════════════════ */
 .header-actions {
   display: flex;
   align-items: center;
@@ -1010,9 +974,6 @@ main {
   color: var(--white);
 }
 
-/* ════════════════════════════════════════════════
-   SKELETON LOADERS
-════════════════════════════════════════════════ */
 @keyframes shimmer {
   0% {
     background-position: -600px 0;
@@ -1080,9 +1041,6 @@ main {
   flex-shrink: 0;
 }
 
-/* ════════════════════════════════════════════════
-   FOOTER
-════════════════════════════════════════════════ */
 .site-footer {
   background: var(--navy);
   margin-top: auto;
@@ -1143,9 +1101,6 @@ main {
   text-align: center;
 }
 
-/* ════════════════════════════════════════════════
-   DISCLAIMER DIALOG
-════════════════════════════════════════════════ */
 #disclaimer-dialog {
   border: none;
   border-radius: var(--radius-lg);
@@ -1154,7 +1109,6 @@ main {
   max-width: 460px;
   box-shadow: var(--shadow-lg);
   background: var(--white);
-  /* centering – overrides browser default absolute positioning */
   position: fixed;
   top: 50%;
   left: 50%;
@@ -1272,7 +1226,6 @@ main {
   background: var(--navy-light);
 }
 
-/* ── Micro-animations ────────────────────────── */
 @keyframes addBtnBounce {
   0% {
     scale: 1;
@@ -1323,9 +1276,6 @@ main {
   animation: rowOut .2s ease forwards !important;
 }
 
-/* ════════════════════════════════════════════════
-   UTILS
-════════════════════════════════════════════════ */
 .text-right {
   text-align: right;
 }

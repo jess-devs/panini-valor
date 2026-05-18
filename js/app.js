@@ -3,7 +3,7 @@ import { buildIndex, search } from './search.js';
 import { loadRate, saveRate, calcPrice, formatCRC, formatEUR, DEFAULT_RATE } from './converter.js';
 import { openDialog, closeDialog } from './transitions.js';
 
-// ── SVG icons ─────────────────────────────────────────────────────────────────
+/** @type {{ plus: string, check: string, x: string, user: string, userSm: string }} */
 const ICON = {
   plus: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
   check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
@@ -12,18 +12,32 @@ const ICON = {
   userSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
 };
 
-// ── Estado ────────────────────────────────────────────────────────────────────
+/** @type {object[]} */
 let players = [];
+/** @type {string[]} */
 let searchIndex = [];
+/** @type {{ millones: number, colones: number }} */
 let currentRate = loadRate();
 
-// ── Carrito ───────────────────────────────────────────────────────────────────
 const CART_KEY = 'panini_cart';
+/** @type {object[]} */
 let cart = [];
 
+/**
+ * Devuelve los IDs del carrito como strings.
+ * @returns {string[]}
+ */
 function cartIds() { return cart.map(p => String(p.player_id)); }
+
+/**
+ * Persiste los IDs del carrito en localStorage.
+ */
 function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cartIds())); }
 
+/**
+ * Restaura el carrito desde localStorage cruzando con el catálogo cargado.
+ * @param {object[]} allPlayers
+ */
 function loadCart(allPlayers) {
   try {
     const ids = new Set(JSON.parse(localStorage.getItem(CART_KEY) || '[]').map(String));
@@ -32,6 +46,10 @@ function loadCart(allPlayers) {
   } catch (_) { }
 }
 
+/**
+ * Agrega un jugador al carrito y dispara la animación de bounce en el botón.
+ * @param {string|number} playerId
+ */
 function addToCart(playerId) {
   const id = String(playerId);
   if (cartIds().includes(id)) return;
@@ -48,6 +66,11 @@ function addToCart(playerId) {
   }
 }
 
+/**
+ * Elimina un jugador del carrito animando la fila de salida.
+ * Usa setTimeout en lugar de animationend para evitar conflictos de especificidad CSS.
+ * @param {string|number} playerId
+ */
 function removeFromCart(playerId) {
   const id = String(playerId);
   const row = $cartBody.querySelector(`[data-del-id="${id}"]`)?.closest('tr');
@@ -69,7 +92,6 @@ function removeFromCart(playerId) {
   }
 }
 
-// ── Refs DOM ──────────────────────────────────────────────────────────────────
 const $overlay = document.getElementById('overlay');
 const $progress = document.getElementById('progress-bar');
 const $loadMsg = document.getElementById('load-msg');
@@ -92,7 +114,10 @@ const $disclaimerDialog = document.getElementById('disclaimer-dialog');
 const $disclaimerClose = document.getElementById('disclaimer-close');
 const $disclaimerTrigger = document.getElementById('disclaimer-trigger');
 
-// ── Skeleton loaders ──────────────────────────────────────────────────────────
+/**
+ * Genera el HTML de una tarjeta skeleton para el estado de carga.
+ * @returns {string}
+ */
 function skeletonCard() {
   return `<div class="card-skeleton">
     <div class="sk-avatar skeleton-bg"></div>
@@ -105,15 +130,25 @@ function skeletonCard() {
   </div>`;
 }
 
+/**
+ * Muestra n tarjetas skeleton en el contenedor de resultados.
+ * @param {number} [n=6]
+ */
 function showSkeletons(n = 6) {
   $results.innerHTML = Array(n).fill(skeletonCard()).join('');
 }
 
+/**
+ * Limpia el contenedor de resultados.
+ */
 function hideSkeletons() {
   $results.innerHTML = '';
 }
 
-// ── Carga inicial ─────────────────────────────────────────────────────────────
+/**
+ * Descarga el catálogo, inicializa el índice de búsqueda y el carrito,
+ * luego muestra el disclaimer si es la primera visita.
+ */
 async function init() {
   try {
     players = await downloadAndParse(pct => {
@@ -136,7 +171,6 @@ async function init() {
   }
 }
 
-// ── Búsqueda ──────────────────────────────────────────────────────────────────
 $searchBox.addEventListener('input', () => {
   const query = $searchBox.value;
   if (!query || query.trim().length < 2) {
@@ -147,6 +181,11 @@ $searchBox.addEventListener('input', () => {
   renderResults(found, query);
 });
 
+/**
+ * Renderiza las tarjetas de resultados de búsqueda.
+ * @param {object[]} found
+ * @param {string}   query
+ */
 function renderResults(found, query) {
   if (!query || query.trim().length < 2) { $results.innerHTML = ''; return; }
   if (found.length === 0) {
@@ -157,6 +196,12 @@ function renderResults(found, query) {
   $results.innerHTML = found.map(p => cardHTML(p, inCart.has(String(p.player_id)))).join('');
 }
 
+/**
+ * Genera el HTML de una tarjeta de jugador.
+ * @param {object}  p     - Fila del CSV (jugador).
+ * @param {boolean} added - Si ya está en el carrito.
+ * @returns {string}
+ */
 function cardHTML(p, added) {
   const price = calcPrice(p.market_value_in_eur, currentRate);
   const country = getCountryDisplay(p.country_of_citizenship);
@@ -192,11 +237,20 @@ function cardHTML(p, added) {
   </div>`;
 }
 
+/**
+ * Actualiza el botón para reflejar que el jugador fue agregado al carrito.
+ * @param {HTMLButtonElement} btn
+ */
 function setAdded(btn) {
   btn.innerHTML = ICON.check;
   btn.classList.add('add-btn--added');
   btn.title = 'Ya está en tu lista';
 }
+
+/**
+ * Actualiza el botón para reflejar que el jugador no está en el carrito.
+ * @param {HTMLButtonElement} btn
+ */
 function setNotAdded(btn) {
   btn.innerHTML = ICON.plus;
   btn.classList.remove('add-btn--added');
@@ -208,7 +262,9 @@ $results.addEventListener('click', e => {
   if (btn) addToCart(btn.dataset.addId);
 });
 
-// ── Carrito: render ───────────────────────────────────────────────────────────
+/**
+ * Re-renderiza la sección del carrito con los jugadores actuales y el subtotal.
+ */
 function renderCart() {
   $cartCount.textContent = cart.length;
 
@@ -264,12 +320,14 @@ $clearCart.addEventListener('click', () => {
   document.querySelectorAll('.add-btn--added').forEach(setNotAdded);
 });
 
-// ── Disclaimer (View Transitions) ─────────────────────────────────────────────
 const DISCLAIMER_KEY = 'panini_disclaimer_v1';
 
+/**
+ * Muestra el disclaimer si el usuario no lo ha visto antes.
+ * El delay permite que el overlay de carga termine su animación de salida.
+ */
 async function maybeShowDisclaimer() {
   if (localStorage.getItem(DISCLAIMER_KEY)) return;
-  // Pequeño delay para que el overlay termine de desvanecer
   await new Promise(r => setTimeout(r, 350));
   await openDialog($disclaimerDialog, $disclaimerTrigger);
 }
@@ -283,23 +341,31 @@ $disclaimerTrigger.addEventListener('click', async () => {
   await openDialog($disclaimerDialog, $disclaimerTrigger);
 });
 
-// Cerrar con Escape ya lo maneja <dialog> natively,
-// pero necesitamos persistir el flag
+/**
+ * El cierre con Escape lo maneja <dialog> natively, pero igualmente
+ * necesitamos persistir el flag para no mostrar el disclaimer de nuevo.
+ */
 $disclaimerDialog.addEventListener('close', () => {
   localStorage.setItem(DISCLAIMER_KEY, '1');
 });
 
-// ── Modal configuración ───────────────────────────────────────────────────────
 $configBtn.addEventListener('click', openModal);
 $modalClose.addEventListener('click', closeModal);
 $modal.addEventListener('click', e => { if (e.target === $modal) closeModal(); });
 
+/**
+ * Abre el modal de configuración de tasa y pre-rellena los campos.
+ */
 function openModal() {
   $fMillones.value = currentRate.millones;
   $fColones.value = currentRate.colones;
   $modal.classList.remove('hidden', 'modal-closing');
   $fMillones.focus();
 }
+
+/**
+ * Cierra el modal de configuración con animación de salida.
+ */
 function closeModal() {
   $modal.classList.add('modal-closing');
   setTimeout(() => {
@@ -324,5 +390,4 @@ $resetBtn.addEventListener('click', () => {
   $fColones.value = DEFAULT_RATE.colones;
 });
 
-// ── Arranque ──────────────────────────────────────────────────────────────────
 init();

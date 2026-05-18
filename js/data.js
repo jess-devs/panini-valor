@@ -1,35 +1,39 @@
 export const CSV_URL = 'data/players.csv.gz';
 
-// Países clasificados al Mundial 2026, tal como aparecen en country_of_citizenship del dataset
+/**
+ * Países clasificados al Mundial 2026, tal como aparecen
+ * en el campo country_of_citizenship del dataset de Transfermarkt.
+ * @type {Set<string>}
+ */
 const WC2026_COUNTRIES = new Set([
-  // CONMEBOL
   'Argentina', 'Brazil', 'Colombia', 'Uruguay', 'Ecuador', 'Paraguay',
-  // UEFA
   'Spain', 'France', 'Germany', 'Portugal', 'Netherlands', 'Belgium',
   'Croatia', 'Switzerland', 'Norway', 'Scotland', 'Austria', 'England',
   'Bosnia-Herzegovina', 'Sweden', 'Turkey', 'Czech Republic',
-  // CONCACAF
   'United States', 'Mexico', 'Canada', 'Haiti', 'Panama', 'Curacao',
-  // CAF
   'Morocco', 'Egypt', 'Algeria', 'Ghana', "Cote d'Ivoire", 'Tunisia',
   'Senegal', 'South Africa', 'DR Congo', 'Cape Verde',
-  // AFC
   'Japan', 'Korea, South', 'Australia', 'Iran', 'Saudi Arabia',
   'Qatar', 'Uzbekistan', 'Jordan', 'Iraq',
-  // OFC
   'New Zealand',
 ]);
 
-// Mapa de país → nombre para mostrar en la UI
+/**
+ * Nombres localizados al español para países con nombres especiales en el dataset.
+ * @type {Record<string, string>}
+ */
 export const COUNTRY_DISPLAY = {
-  'Korea, South': 'Corea del Sur',
-  "Cote d'Ivoire": 'Costa de Marfil',
-  'DR Congo': 'R.D. Congo',
-  'Bosnia-Herzegovina': 'Bosnia y Herzegovina',
-  'Czech Republic': 'Chequia',
+  'Korea, South':      'Corea del Sur',
+  "Cote d'Ivoire":     'Costa de Marfil',
+  'DR Congo':          'R.D. Congo',
+  'Bosnia-Herzegovina':'Bosnia y Herzegovina',
+  'Czech Republic':    'Chequia',
 };
 
-// Códigos ISO 3166-1 alpha-2 para flag-icons CSS
+/**
+ * Códigos ISO 3166-1 alpha-2 para la librería flag-icons.
+ * @type {Record<string, string>}
+ */
 const ISO_CODES = {
   Argentina: 'ar', Brazil: 'br', Colombia: 'co', Uruguay: 'uy',
   Ecuador: 'ec', Paraguay: 'py', Spain: 'es', France: 'fr',
@@ -46,25 +50,47 @@ const ISO_CODES = {
   Uzbekistan: 'uz', Jordan: 'jo', Iraq: 'iq', 'New Zealand': 'nz',
 };
 
+/**
+ * Devuelve el código ISO del país o cadena vacía si no existe.
+ * @param {string} country
+ * @returns {string}
+ */
 export function getISO(country) {
   return ISO_CODES[country] || '';
 }
 
+/**
+ * Devuelve el nombre localizado al español o el original si no hay traducción.
+ * @param {string} country
+ * @returns {string}
+ */
 export function getCountryDisplay(country) {
   return COUNTRY_DISPLAY[country] || country;
 }
 
+/** @type {Record<string, string>} */
 const POSITION_ES = {
-  'Attack': 'Delantero',
-  'Midfield': 'Mediocampista',
-  'Defender': 'Defensa',
+  'Attack':     'Delantero',
+  'Midfield':   'Mediocampista',
+  'Defender':   'Defensa',
   'Goalkeeper': 'Portero',
 };
 
+/**
+ * Traduce al español la posición del jugador.
+ * @param {string} position
+ * @returns {string}
+ */
 export function getPositionES(position) {
   return POSITION_ES[position] || position || '—';
 }
 
+/**
+ * Descarga y descomprime el CSV de jugadores, lo parsea con PapaParse
+ * y filtra solo los clasificados al Mundial 2026 con valor de mercado > 0.
+ * @param {(pct: number) => void} onProgress - Callback con progreso 0–1.
+ * @returns {Promise<object[]>}
+ */
 export async function downloadAndParse(onProgress) {
   const response = await fetch(CSV_URL);
   if (!response.ok) throw new Error(`Error al descargar datos: ${response.status}`);
@@ -73,7 +99,6 @@ export async function downloadAndParse(onProgress) {
   const total = contentLength ? parseInt(contentLength, 10) : 0;
   let loaded = 0;
 
-  // Descomprime gzip con DecompressionStream nativa del navegador
   const decompressed = response.body.pipeThrough(new DecompressionStream('gzip'));
   const reader = decompressed.getReader();
   const chunks = [];
@@ -103,8 +128,7 @@ export async function downloadAndParse(onProgress) {
       dynamicTyping: true,
       skipEmptyLines: true,
       complete({ data }) {
-        const filtered = filterWC2026(data);
-        resolve(filtered);
+        resolve(filterWC2026(data));
       },
       error(err) {
         reject(new Error('Error al procesar los datos: ' + err.message));
@@ -113,6 +137,12 @@ export async function downloadAndParse(onProgress) {
   });
 }
 
+/**
+ * Filtra las filas del CSV: solo jugadores de selecciones clasificadas
+ * al Mundial 2026 con valor de mercado mayor a cero.
+ * @param {object[]} rows
+ * @returns {object[]}
+ */
 function filterWC2026(rows) {
   return rows.filter(row => {
     const country = (row.country_of_citizenship || '').trim();

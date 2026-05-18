@@ -57,7 +57,6 @@
     font-size: .88rem;
   }
 
-  /* ── Cart: card layout on mobile ── */
   .cart-table-wrap {
     overflow-x: visible;
   }
@@ -119,7 +118,6 @@
     background: transparent;
   }
 
-  /* Línea 1: jugador (izq) + botón eliminar (der) */
   .cart-table tbody td:nth-child(1) {
     width: calc(100% - 40px);
     flex-shrink: 1;
@@ -140,7 +138,6 @@
     justify-content: flex-end;
   }
 
-  /* Línea 2: selección (izq) + precio CRC (der) */
   .cart-table tbody td:nth-child(2) {
     flex: 1 1 auto;
     min-width: 0;
@@ -160,7 +157,6 @@
     margin-left: auto;
   }
 
-  /* Ocultos */
   .cart-table tbody td:nth-child(3),
   .cart-table tbody td:nth-child(4) {
     display: none;
