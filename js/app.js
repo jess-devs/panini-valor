@@ -1,8 +1,7 @@
 import { downloadAndParse, getISO, getCountryDisplay, getPositionES } from './data.js';
 import { buildIndex, search } from './search.js';
-import {
-  loadRate, saveRate, calcPrice, formatCRC, formatEUR, DEFAULT_RATE,
-} from './converter.js';
+import { loadRate, saveRate, calcPrice, formatCRC, formatEUR, DEFAULT_RATE } from './converter.js';
+import { openDialog, closeDialog } from './transitions.js';
 
 // ── SVG icons ─────────────────────────────────────────────────────────────────
 const ICON = {
@@ -10,6 +9,7 @@ const ICON = {
   check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
   x: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
   user: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  userSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
 };
 
 // ── Estado ────────────────────────────────────────────────────────────────────
@@ -22,18 +22,14 @@ const CART_KEY = 'panini_cart';
 let cart = [];
 
 function cartIds() { return cart.map(p => String(p.player_id)); }
-
-function saveCart() {
-  localStorage.setItem(CART_KEY, JSON.stringify(cartIds()));
-}
+function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cartIds())); }
 
 function loadCart(allPlayers) {
   try {
-    const ids = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
-    if (!ids.length) return;
-    const idSet = new Set(ids.map(String));
-    cart = allPlayers.filter(p => idSet.has(String(p.player_id)));
-  } catch (_) {}
+    const ids = new Set(JSON.parse(localStorage.getItem(CART_KEY) || '[]').map(String));
+    if (!ids.size) return;
+    cart = allPlayers.filter(p => ids.has(String(p.player_id)));
+  } catch (_) { }
 }
 
 function addToCart(playerId) {
@@ -45,37 +41,77 @@ function addToCart(playerId) {
   saveCart();
   renderCart();
   const btn = document.querySelector(`[data-add-id="${id}"]`);
-  if (btn) setAdded(btn);
+  if (btn) {
+    setAdded(btn);
+    btn.classList.add('add-btn--pop');
+    btn.addEventListener('animationend', () => btn.classList.remove('add-btn--pop'), { once: true });
+  }
 }
 
 function removeFromCart(playerId) {
   const id = String(playerId);
-  cart = cart.filter(p => String(p.player_id) !== id);
-  saveCart();
-  renderCart();
-  const btn = document.querySelector(`[data-add-id="${id}"]`);
-  if (btn) setNotAdded(btn);
+  const row = $cartBody.querySelector(`[data-del-id="${id}"]`)?.closest('tr');
+  if (row) {
+    row.classList.add('cart-row-out');
+    setTimeout(() => {
+      cart = cart.filter(p => String(p.player_id) !== id);
+      saveCart();
+      renderCart();
+      const btn = document.querySelector(`[data-add-id="${id}"]`);
+      if (btn) setNotAdded(btn);
+    }, 220);
+  } else {
+    cart = cart.filter(p => String(p.player_id) !== id);
+    saveCart();
+    renderCart();
+    const btn = document.querySelector(`[data-add-id="${id}"]`);
+    if (btn) setNotAdded(btn);
+  }
 }
 
 // ── Refs DOM ──────────────────────────────────────────────────────────────────
-const $overlay     = document.getElementById('overlay');
-const $progress    = document.getElementById('progress-bar');
-const $loadMsg     = document.getElementById('load-msg');
-const $loadError   = document.getElementById('load-error');
-const $searchBox   = document.getElementById('search');
-const $results     = document.getElementById('results');
-const $configBtn   = document.getElementById('config-btn');
-const $modal       = document.getElementById('modal');
-const $modalClose  = document.getElementById('modal-close');
-const $fMillones   = document.getElementById('f-millones');
-const $fColones    = document.getElementById('f-colones');
-const $saveBtn     = document.getElementById('save-btn');
-const $resetBtn    = document.getElementById('reset-btn');
+const $overlay = document.getElementById('overlay');
+const $progress = document.getElementById('progress-bar');
+const $loadMsg = document.getElementById('load-msg');
+const $loadError = document.getElementById('load-error');
+const $searchBox = document.getElementById('search');
+const $results = document.getElementById('results');
+const $configBtn = document.getElementById('config-btn');
+const $modal = document.getElementById('modal');
+const $modalClose = document.getElementById('modal-close');
+const $fMillones = document.getElementById('f-millones');
+const $fColones = document.getElementById('f-colones');
+const $saveBtn = document.getElementById('save-btn');
+const $resetBtn = document.getElementById('reset-btn');
 const $cartSection = document.getElementById('cart-section');
-const $cartBody    = document.getElementById('cart-body');
-const $cartTotal   = document.getElementById('cart-total');
-const $clearCart   = document.getElementById('clear-cart');
-const $cartCount   = document.getElementById('cart-count');
+const $cartBody = document.getElementById('cart-body');
+const $cartTotal = document.getElementById('cart-total');
+const $clearCart = document.getElementById('clear-cart');
+const $cartCount = document.getElementById('cart-count');
+const $disclaimerDialog = document.getElementById('disclaimer-dialog');
+const $disclaimerClose = document.getElementById('disclaimer-close');
+const $disclaimerTrigger = document.getElementById('disclaimer-trigger');
+
+// ── Skeleton loaders ──────────────────────────────────────────────────────────
+function skeletonCard() {
+  return `<div class="card-skeleton">
+    <div class="sk-avatar skeleton-bg"></div>
+    <div class="sk-body">
+      <div class="sk-line sk-line-name skeleton-bg"></div>
+      <div class="sk-line sk-line-meta skeleton-bg"></div>
+      <div class="sk-line sk-line-price skeleton-bg"></div>
+    </div>
+    <div class="sk-btn skeleton-bg"></div>
+  </div>`;
+}
+
+function showSkeletons(n = 6) {
+  $results.innerHTML = Array(n).fill(skeletonCard()).join('');
+}
+
+function hideSkeletons() {
+  $results.innerHTML = '';
+}
 
 // ── Carga inicial ─────────────────────────────────────────────────────────────
 async function init() {
@@ -86,9 +122,12 @@ async function init() {
     });
     searchIndex = buildIndex(players);
     loadCart(players);
+
     $overlay.classList.add('hidden');
-    renderCart();
     $searchBox.focus();
+
+    renderCart();
+    await maybeShowDisclaimer();
   } catch (err) {
     $loadMsg.textContent = '';
     $loadError.textContent =
@@ -100,15 +139,16 @@ async function init() {
 // ── Búsqueda ──────────────────────────────────────────────────────────────────
 $searchBox.addEventListener('input', () => {
   const query = $searchBox.value;
+  if (!query || query.trim().length < 2) {
+    $results.innerHTML = '';
+    return;
+  }
   const found = search(query, searchIndex, players);
   renderResults(found, query);
 });
 
 function renderResults(found, query) {
-  if (!query || query.trim().length < 2) {
-    $results.innerHTML = '';
-    return;
-  }
+  if (!query || query.trim().length < 2) { $results.innerHTML = ''; return; }
   if (found.length === 0) {
     $results.innerHTML = `<p class="empty-msg">No se encontró ningún jugador con ese nombre en las 48 selecciones del Mundial 2026.</p>`;
     return;
@@ -117,32 +157,23 @@ function renderResults(found, query) {
   $results.innerHTML = found.map(p => cardHTML(p, inCart.has(String(p.player_id)))).join('');
 }
 
-function flagDot(country) {
-  const iso = getISO(country);
-  if (!iso) return '';
-  return `<div class="player-flag-dot"><span class="fi fi-${iso}"></span></div>`;
-}
-
 function cardHTML(p, added) {
-  const price   = calcPrice(p.market_value_in_eur, currentRate);
+  const price = calcPrice(p.market_value_in_eur, currentRate);
   const country = getCountryDisplay(p.country_of_citizenship);
-  const pos     = getPositionES(p.position);
-  const imgSrc  = p.image_url || '';
+  const pos = getPositionES(p.position);
+  const iso = getISO(p.country_of_citizenship);
+  const imgSrc = p.image_url || '';
 
   const photo = imgSrc
     ? `<img src="${imgSrc}" alt="${p.name}" class="player-img" loading="lazy"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
     : '';
-  const placeholder = `<div class="player-placeholder" ${imgSrc ? 'style="display:none"' : ''}>${ICON.user}</div>`;
-
-  const btnClass = added ? 'add-btn add-btn--added' : 'add-btn';
+  const ph = `<div class="player-placeholder" ${imgSrc ? 'style="display:none"' : ''}>${ICON.user}</div>`;
+  const dot = iso ? `<div class="player-flag-dot"><span class="fi fi-${iso}"></span></div>` : '';
 
   return `
   <div class="card">
-    <div class="player-photo-wrap">
-      ${photo}${placeholder}
-      ${flagDot(p.country_of_citizenship)}
-    </div>
+    <div class="player-photo-wrap">${photo}${ph}${dot}</div>
     <div class="card-body">
       <p class="player-name">${p.name}</p>
       <div class="player-meta">
@@ -154,9 +185,8 @@ function cardHTML(p, added) {
         <span class="player-crc">${formatCRC(price)}</span>
       </div>
     </div>
-    <button class="${btnClass}" data-add-id="${p.player_id}"
-      title="${added ? 'Ya está en tu lista' : 'Agregar a mi lista'}"
-      aria-label="${added ? 'Ya agregado' : 'Agregar'}">
+    <button class="add-btn${added ? ' add-btn--added' : ''}" data-add-id="${p.player_id}"
+      title="${added ? 'Ya está en tu lista' : 'Agregar a mi lista'}" aria-label="${added ? 'Agregado' : 'Agregar'}">
       ${added ? ICON.check : ICON.plus}
     </button>
   </div>`;
@@ -180,54 +210,42 @@ $results.addEventListener('click', e => {
 
 // ── Carrito: render ───────────────────────────────────────────────────────────
 function renderCart() {
-  const count = cart.length;
-  $cartCount.textContent = count;
+  $cartCount.textContent = cart.length;
 
-  if (count === 0) {
+  if (!cart.length) {
     $cartSection.classList.add('cart--empty');
     $cartTotal.textContent = '—';
     return;
   }
 
   $cartSection.classList.remove('cart--empty');
-
   let subtotal = 0;
+
   $cartBody.innerHTML = cart.map(p => {
-    const price   = calcPrice(p.market_value_in_eur, currentRate);
+    const price = calcPrice(p.market_value_in_eur, currentRate);
     subtotal += price;
     const country = getCountryDisplay(p.country_of_citizenship);
-    const pos     = getPositionES(p.position);
-    const iso     = getISO(p.country_of_citizenship);
-    const imgSrc  = p.image_url || '';
+    const pos = getPositionES(p.position);
+    const iso = getISO(p.country_of_citizenship);
+    const imgSrc = p.image_url || '';
 
-    const avatar = imgSrc
+    const av = imgSrc
       ? `<img src="${imgSrc}" alt="${p.name}" class="cart-avatar" loading="lazy"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
       : '';
-    const avatarPh = `<div class="cart-avatar-ph" ${imgSrc ? 'style="display:none"' : ''}>${ICON.user}</div>`;
-    const flagDotHtml = iso
-      ? `<div class="cart-flag-dot"><span class="fi fi-${iso}"></span></div>`
-      : '';
+    const avPh = `<div class="cart-avatar-ph" ${imgSrc ? 'style="display:none"' : ''}>${ICON.userSm}</div>`;
+    const dot = iso ? `<div class="cart-flag-dot"><span class="fi fi-${iso}"></span></div>` : '';
 
-    return `
-    <tr>
-      <td>
-        <div class="cart-player-cell">
-          <div class="cart-avatar-wrap">${avatar}${avatarPh}${flagDotHtml}</div>
-          <span class="cart-player-name">${p.name}</span>
-        </div>
-      </td>
-      <td class="cart-country-cell">
-        ${iso ? `<span class="fi fi-${iso}"></span>` : ''}${country}
-      </td>
+    return `<tr>
+      <td><div class="cart-player-cell">
+        <div class="cart-avatar-wrap">${av}${avPh}${dot}</div>
+        <span class="cart-player-name">${p.name}</span>
+      </div></td>
+      <td class="cart-country-cell">${iso ? `<span class="fi fi-${iso}"></span>` : ''}${country}</td>
       <td><span class="cart-pos-badge">${pos}</span></td>
       <td class="cell-eur">${formatEUR(p.market_value_in_eur)}</td>
       <td class="cell-crc">${formatCRC(price)}</td>
-      <td>
-        <button class="del-btn" data-del-id="${p.player_id}" aria-label="Eliminar ${p.name}">
-          ${ICON.x}
-        </button>
-      </td>
+      <td><button class="del-btn" data-del-id="${p.player_id}" aria-label="Eliminar ${p.name}">${ICON.x}</button></td>
     </tr>`;
   }).join('');
 
@@ -246,28 +264,54 @@ $clearCart.addEventListener('click', () => {
   document.querySelectorAll('.add-btn--added').forEach(setNotAdded);
 });
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
+// ── Disclaimer (View Transitions) ─────────────────────────────────────────────
+const DISCLAIMER_KEY = 'panini_disclaimer_v1';
+
+async function maybeShowDisclaimer() {
+  if (localStorage.getItem(DISCLAIMER_KEY)) return;
+  // Pequeño delay para que el overlay termine de desvanecer
+  await new Promise(r => setTimeout(r, 350));
+  await openDialog($disclaimerDialog, $disclaimerTrigger);
+}
+
+$disclaimerClose.addEventListener('click', async () => {
+  localStorage.setItem(DISCLAIMER_KEY, '1');
+  await closeDialog($disclaimerDialog);
+});
+
+$disclaimerTrigger.addEventListener('click', async () => {
+  await openDialog($disclaimerDialog, $disclaimerTrigger);
+});
+
+// Cerrar con Escape ya lo maneja <dialog> natively,
+// pero necesitamos persistir el flag
+$disclaimerDialog.addEventListener('close', () => {
+  localStorage.setItem(DISCLAIMER_KEY, '1');
+});
+
+// ── Modal configuración ───────────────────────────────────────────────────────
 $configBtn.addEventListener('click', openModal);
 $modalClose.addEventListener('click', closeModal);
 $modal.addEventListener('click', e => { if (e.target === $modal) closeModal(); });
 
 function openModal() {
   $fMillones.value = currentRate.millones;
-  $fColones.value  = currentRate.colones;
-  $modal.classList.remove('hidden');
+  $fColones.value = currentRate.colones;
+  $modal.classList.remove('hidden', 'modal-closing');
   $fMillones.focus();
 }
 function closeModal() {
-  $modal.classList.add('hidden');
+  $modal.classList.add('modal-closing');
+  setTimeout(() => {
+    $modal.classList.add('hidden');
+    $modal.classList.remove('modal-closing');
+  }, 210);
 }
 
 $saveBtn.addEventListener('click', () => {
   const m = parseFloat($fMillones.value);
   const c = parseFloat($fColones.value);
-  if (!m || !c || m <= 0 || c <= 0) {
-    alert('Los valores deben ser números positivos.');
-    return;
-  }
+  if (!m || !c || m <= 0 || c <= 0) { alert('Los valores deben ser números positivos.'); return; }
   currentRate = { millones: m, colones: c };
   saveRate(currentRate);
   closeModal();
@@ -277,8 +321,8 @@ $saveBtn.addEventListener('click', () => {
 
 $resetBtn.addEventListener('click', () => {
   $fMillones.value = DEFAULT_RATE.millones;
-  $fColones.value  = DEFAULT_RATE.colones;
+  $fColones.value = DEFAULT_RATE.colones;
 });
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Arranque ──────────────────────────────────────────────────────────────────
 init();

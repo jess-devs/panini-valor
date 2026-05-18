@@ -1,3 +1,5 @@
+import { getCountryDisplay } from './data.js';
+
 function normalize(str) {
   if (!str) return '';
   return str
@@ -7,7 +9,12 @@ function normalize(str) {
 }
 
 export function buildIndex(players) {
-  return players.map(p => normalize(p.name || ''));
+  return players.map(p => {
+    const name = normalize(p.name || '');
+    const country = normalize(p.country_of_citizenship || '');
+    const display = normalize(getCountryDisplay(p.country_of_citizenship || ''));
+    return `${name} ${country} ${display}`;
+  });
 }
 
 export function search(query, index, players) {

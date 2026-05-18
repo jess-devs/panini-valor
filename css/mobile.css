@@ -1,34 +1,176 @@
 @media (max-width: 600px) {
-  header { padding: 0 16px; }
-  #config-btn span { display: none; }
+  header {
+    padding: 0 16px;
+  }
 
-  main { padding: 24px 16px 64px; }
+  #config-btn span {
+    display: none;
+  }
 
-  .search-heading { font-size: 1.3rem; }
-  #search { height: 48px; font-size: .95rem; }
+  .header-icon-btn {
+    width: 32px;
+    height: 32px;
+  }
 
-  #results { grid-template-columns: 1fr; gap: 10px; }
+  main {
+    padding: 24px 16px 64px;
+  }
 
-  .card { padding: 12px 10px 12px 12px; gap: 12px; }
-  .player-img, .player-placeholder { width: 58px; height: 58px; }
-  .player-name { font-size: .92rem; }
-  .player-crc  { font-size: 1.1rem; }
+  .search-heading {
+    font-size: 1.3rem;
+  }
 
-  .cart-header { padding: 14px 16px; }
-  .cart-title  { font-size: .88rem; }
+  #search {
+    height: 48px;
+    font-size: .95rem;
+  }
 
-  .cart-table thead th,
-  .cart-table tbody td,
-  .cart-table tfoot td { padding: 10px 12px; }
+  #results {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 
-  /* Ocultar columna posición en móvil */
-  .cart-table th:nth-child(3),
-  .cart-table td:nth-child(3) { display: none; }
+  .card {
+    padding: 12px 10px 12px 12px;
+    gap: 12px;
+  }
 
-  .cart-total-value { font-size: 1rem; }
-}
+  .player-img,
+  .player-placeholder {
+    width: 58px;
+    height: 58px;
+  }
 
-@media (max-width: 400px) {
-  .cart-table th:nth-child(4),
-  .cart-table td:nth-child(4) { display: none; }
+  .player-name {
+    font-size: .92rem;
+  }
+
+  .player-crc {
+    font-size: 1.1rem;
+  }
+
+  .cart-header {
+    padding: 14px 16px;
+  }
+
+  .cart-title {
+    font-size: .88rem;
+  }
+
+  /* ── Cart: card layout on mobile ── */
+  .cart-table-wrap {
+    overflow-x: visible;
+  }
+
+  .cart-table {
+    display: block;
+  }
+
+  .cart-table thead {
+    display: none;
+  }
+
+  .cart-table tfoot {
+    display: block;
+    border-top: 2px solid var(--border);
+  }
+
+  .cart-table tfoot tr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--surface);
+  }
+
+  .cart-table tfoot td {
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+
+  .cart-table tfoot td:first-child {
+    flex: 1;
+    text-align: left;
+  }
+
+  .cart-table tfoot td:last-child {
+    display: none;
+  }
+
+  .cart-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .cart-table tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    border-bottom: none !important;
+  }
+
+  .cart-table tbody tr:hover td {
+    background: transparent;
+  }
+
+  /* Línea 1: jugador (izq) + botón eliminar (der) */
+  .cart-table tbody td:nth-child(1) {
+    width: calc(100% - 40px);
+    flex-shrink: 1;
+    min-width: 0;
+    order: 1;
+    padding: 0;
+    border: none;
+  }
+
+  .cart-table tbody td:nth-child(6) {
+    width: 40px;
+    flex-shrink: 0;
+    order: 2;
+    padding: 0;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  /* Línea 2: selección (izq) + precio CRC (der) */
+  .cart-table tbody td:nth-child(2) {
+    flex: 1 1 auto;
+    min-width: 0;
+    order: 3;
+    padding: 4px 0 0;
+    border: none;
+    font-size: .78rem;
+  }
+
+  .cart-table tbody td:nth-child(5) {
+    flex: 0 0 auto;
+    order: 4;
+    padding: 4px 0 0;
+    border: none;
+    font-size: .9rem;
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  /* Ocultos */
+  .cart-table tbody td:nth-child(3),
+  .cart-table tbody td:nth-child(4) {
+    display: none;
+  }
+
+  .cart-table tfoot td {
+    padding: 12px 16px;
+  }
+
+  .cart-total-value {
+    font-size: 1rem;
+  }
 }

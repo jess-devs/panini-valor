@@ -8,7 +8,7 @@ export function loadRate() {
       const rate = JSON.parse(saved);
       if (rate.millones > 0 && rate.colones > 0) return rate;
     }
-  } catch (_) {}
+  } catch (_) { }
   return { ...DEFAULT_RATE };
 }
 
