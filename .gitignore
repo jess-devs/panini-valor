@@ -1,4 +1,4 @@
 .documentos/
-data/
+data/*.csv
 view-transition-modal/
 .claude
