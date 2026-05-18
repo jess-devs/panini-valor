@@ -157,9 +157,23 @@
         margin-left: auto;
     }
 
-    .cart-table tbody td:nth-child(3),
+    .cart-table tbody td:nth-child(3) {
+        display: none;
+    }
+
     .cart-table tbody td:nth-child(4) {
         display: none;
+    }
+
+    /* Muestra el input de estimación en la 3ra fila del card (solo filas sin precio) */
+    .no-price-row td:nth-child(4) {
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-end;
+        width: 100%;
+        order: 5;
+        padding: 6px 0 0 !important;
+        border: none;
     }
 
     .cart-table tfoot td {

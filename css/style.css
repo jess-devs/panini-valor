@@ -1321,3 +1321,78 @@ main {
 .fi {
     line-height: 1;
 }
+
+/* ── Estimador de precio para jugadores sin valor de mercado ── */
+
+.est-cell {
+    text-align: right;
+    vertical-align: middle;
+}
+
+.est-input-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    background: var(--surface);
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    cursor: text;
+}
+
+.est-input-wrap:focus-within {
+    border-color: var(--navy);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(14, 27, 61, 0.08);
+}
+
+.est-prefix,
+.est-suffix {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    user-select: none;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.est-input {
+    width: 52px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--navy);
+    text-align: right;
+    outline: none;
+    padding: 0;
+    -moz-appearance: textfield;
+}
+
+.est-input::-webkit-outer-spin-button,
+.est-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.est-input::placeholder {
+    color: var(--text-light);
+    font-weight: 400;
+}
+
+.est-price-cell {
+    text-align: right;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.est-price-pending {
+    color: var(--text-light) !important;
+    font-weight: 500 !important;
+    font-style: italic;
+}

@@ -35,6 +35,9 @@ const CART_KEY = "panini_cart";
 /** @type {object[]} */
 let cart = [];
 
+/** Valores estimados temporales por player_id (en EUR, solo en memoria). */
+const estimatedValues = new Map();
+
 /**
  * Devuelve los IDs del carrito como strings.
  * @returns {string[]}
@@ -100,6 +103,7 @@ function removeFromCart(playerId) {
     row.classList.add("cart-row-out");
     setTimeout(() => {
       cart = cart.filter((p) => String(p.player_id) !== id);
+      estimatedValues.delete(id);
       saveCart();
       renderCart();
       const btn = document.querySelector(`[data-add-id="${id}"]`);
@@ -107,6 +111,7 @@ function removeFromCart(playerId) {
     }, 220);
   } else {
     cart = cart.filter((p) => String(p.player_id) !== id);
+    estimatedValues.delete(id);
     saveCart();
     renderCart();
     const btn = document.querySelector(`[data-add-id="${id}"]`);
@@ -311,13 +316,18 @@ function renderCart() {
 
   $cartBody.innerHTML = cart
     .map((p) => {
-      const price = calcPrice(p.market_value_in_eur, currentRate);
+      const id = String(p.player_id);
+      const hasPrice = !!p.market_value_in_eur;
+      const estRaw = estimatedValues.get(id);
+      const estMillions = estRaw !== undefined ? parseFloat((estRaw / 1_000_000).toFixed(3)) : "";
+      const eurForCalc = hasPrice ? p.market_value_in_eur : (estRaw || null);
+      const price = calcPrice(eurForCalc, currentRate);
       subtotal += price;
+
       const country = getCountryDisplay(p.country_of_citizenship);
       const pos = getPositionES(p.position);
       const iso = getISO(p.country_of_citizenship);
       const imgSrc = p.image_url || "";
-      const hasPrice = !!p.market_value_in_eur;
 
       const av = imgSrc
         ? `<img src="${imgSrc}" alt="${p.name}" class="cart-avatar" loading="lazy"
@@ -328,16 +338,29 @@ function renderCart() {
         ? `<div class="cart-flag-dot"><span class="fi fi-${iso}"></span></div>`
         : "";
 
-      return `<tr>
+      const priceCells = hasPrice
+        ? `<td class="cell-eur">${formatEUR(p.market_value_in_eur)}</td><td class="cell-crc">${formatCRC(price)}</td>`
+        : `<td class="cell-eur est-cell">
+            <div class="est-input-wrap" title="Ingresá el valor estimado en millones de euros">
+              <span class="est-prefix">€</span>
+              <input type="number" class="est-input" data-est-id="${p.player_id}"
+                placeholder="0" min="0" step="any" value="${estMillions}"
+                aria-label="Precio estimado en millones de euros para ${p.name}">
+              <span class="est-suffix">M</span>
+            </div>
+          </td>
+          <td class="cell-crc est-price-cell${estRaw ? "" : " est-price-pending"}" data-est-price-id="${p.player_id}">
+            ${formatCRC(price)}
+          </td>`;
+
+      return `<tr${hasPrice ? "" : ' class="no-price-row"'}>
       <td><div class="cart-player-cell">
         <div class="cart-avatar-wrap">${av}${avPh}${dot}</div>
         <span class="cart-player-name">${p.name}</span>
       </div></td>
       <td class="cart-country-cell">${iso ? `<span class="fi fi-${iso}"></span>` : ""}${country}</td>
       <td><span class="cart-pos-badge">${pos}</span></td>
-      ${hasPrice
-        ? `<td class="cell-eur">${formatEUR(p.market_value_in_eur)}</td><td class="cell-crc">${formatCRC(price)}</td>`
-        : `<td class="cell-eur" colspan="2"><span class="no-price"><a href="https://www.transfermarkt.es/" target="_blank" rel="noopener noreferrer">Precio no disponible</a></span></td>`}
+      ${priceCells}
       <td><button class="del-btn" data-del-id="${p.player_id}" aria-label="Eliminar ${p.name}">${ICON.x}</button></td>
     </tr>`;
     })
@@ -351,8 +374,40 @@ $cartBody.addEventListener("click", (e) => {
   if (btn) removeFromCart(btn.dataset.delId);
 });
 
+$cartBody.addEventListener("input", (e) => {
+  const input = e.target.closest(".est-input");
+  if (!input) return;
+
+  const id = input.dataset.estId;
+  const millions = parseFloat(input.value);
+
+  if (isNaN(millions) || millions <= 0) {
+    estimatedValues.delete(id);
+  } else {
+    estimatedValues.set(id, millions * 1_000_000);
+  }
+
+  const estRaw = estimatedValues.get(id);
+  const price = calcPrice(estRaw || null, currentRate);
+
+  const priceCell = $cartBody.querySelector(`[data-est-price-id="${id}"]`);
+  if (priceCell) {
+    priceCell.textContent = formatCRC(price);
+    priceCell.classList.toggle("est-price-pending", !estRaw);
+  }
+
+  let subtotal = 0;
+  cart.forEach((p) => {
+    const pid = String(p.player_id);
+    const est = estimatedValues.get(pid);
+    subtotal += calcPrice(p.market_value_in_eur || est || null, currentRate);
+  });
+  $cartTotal.textContent = formatCRC(subtotal);
+});
+
 $clearCart.addEventListener("click", () => {
   cart = [];
+  estimatedValues.clear();
   saveCart();
   renderCart();
   document.querySelectorAll(".add-btn--added").forEach(setNotAdded);
