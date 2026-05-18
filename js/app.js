@@ -38,11 +38,32 @@ let cart = [];
 const estimatedValues = new Map();
 const editedValues = new Map();
 const editingIds = new Set();
+const editingTimers = new Map();
+
+const EDITING_TIMEOUT_MS = 3000;
+
+function scheduleCloseEditing(id) {
+  clearTimeout(editingTimers.get(id));
+  editingTimers.set(id, setTimeout(() => closeEditing(id), EDITING_TIMEOUT_MS));
+}
+
+function closeEditing(id) {
+  clearTimeout(editingTimers.get(id));
+  editingTimers.delete(id);
+  if (!editingIds.has(id)) return;
+  editingIds.delete(id);
+  const row = $cartBody?.querySelector(`[data-price-row="${id}"]`);
+  if (row) {
+    row.classList.remove("price-row--editing", "no-price-row--editing");
+  }
+}
 
 function clearPlayerState(id) {
   estimatedValues.delete(id);
   editedValues.delete(id);
   editingIds.delete(id);
+  clearTimeout(editingTimers.get(id));
+  editingTimers.delete(id);
 }
 
 /**
@@ -425,12 +446,12 @@ $cartBody.addEventListener("click", (e) => {
     const editingClass = isNoPriceRow ? "no-price-row--editing" : "price-row--editing";
     const inputSelector = isNoPriceRow ? `[data-est-id="${id}"]` : `[data-edit-eur-id="${id}"]`;
     if (editingIds.has(id)) {
-      editingIds.delete(id);
-      row.classList.remove(editingClass);
+      closeEditing(id);
     } else {
       editingIds.add(id);
       row.classList.add(editingClass);
       setTimeout(() => row.querySelector(inputSelector)?.focus(), 0);
+      scheduleCloseEditing(id);
     }
   }
 });
@@ -451,6 +472,7 @@ $cartBody.addEventListener("input", (e) => {
   const estInput = e.target.closest(".est-input");
   if (estInput) {
     const id = estInput.dataset.estId;
+    scheduleCloseEditing(id);
     const millions = parseFloat(estInput.value);
     if (isNaN(millions) || millions <= 0) estimatedValues.delete(id);
     else estimatedValues.set(id, millions * 1_000_000);
@@ -469,6 +491,7 @@ $cartBody.addEventListener("input", (e) => {
   const editInput = e.target.closest(".edit-eur-input");
   if (!editInput) return;
   const id = editInput.dataset.editEurId;
+  scheduleCloseEditing(id);
   const millions = parseFloat(editInput.value);
   if (isNaN(millions) || millions <= 0) editedValues.delete(id);
   else editedValues.set(id, millions * 1_000_000);
