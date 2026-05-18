@@ -377,6 +377,7 @@ function renderCart() {
       } else {
         priceCells = `
           <td class="cell-eur est-cell">
+            <button class="est-edit-btn" data-edit-id="${id}" title="Agregar estimado" aria-label="Agregar estimado">${ICON.pencil}</button>
             <div class="est-input-wrap" title="Ingresá el valor estimado en millones de euros">
               <span class="est-prefix">€</span>
               <input type="number" class="est-input" data-est-id="${id}"
@@ -386,15 +387,16 @@ function renderCart() {
             </div>
           </td>
           <td class="cell-crc est-price-cell${estRaw ? "" : " est-price-pending"}" data-est-price-id="${id}">
+            <button class="est-edit-mobile-btn" data-edit-id="${id}" aria-label="Agregar estimado">${ICON.pencil}</button>
             ${formatCRC(price)}
           </td>`;
       }
 
       const trClass = hasPrice
         ? `price-row${isEditing ? " price-row--editing" : ""}`
-        : "no-price-row";
+        : `no-price-row${isEditing ? " no-price-row--editing" : ""}`;
 
-      return `<tr class="${trClass}"${hasPrice ? ` data-price-row="${id}"` : ""}>
+      return `<tr class="${trClass}" data-price-row="${id}">
       <td><div class="cart-player-cell">
         <div class="cart-avatar-wrap">${av}${avPh}${dot}</div>
         <span class="cart-player-name">${p.name}</span>
@@ -419,13 +421,16 @@ $cartBody.addEventListener("click", (e) => {
     const id = editBtn.dataset.editId;
     const row = $cartBody.querySelector(`[data-price-row="${id}"]`);
     if (!row) return;
+    const isNoPriceRow = row.classList.contains("no-price-row");
+    const editingClass = isNoPriceRow ? "no-price-row--editing" : "price-row--editing";
+    const inputSelector = isNoPriceRow ? `[data-est-id="${id}"]` : `[data-edit-eur-id="${id}"]`;
     if (editingIds.has(id)) {
       editingIds.delete(id);
-      row.classList.remove("price-row--editing");
+      row.classList.remove(editingClass);
     } else {
       editingIds.add(id);
-      row.classList.add("price-row--editing");
-      setTimeout(() => row.querySelector(`[data-edit-eur-id="${id}"]`)?.focus(), 0);
+      row.classList.add(editingClass);
+      setTimeout(() => row.querySelector(inputSelector)?.focus(), 0);
     }
   }
 });

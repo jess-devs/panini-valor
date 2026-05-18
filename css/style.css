@@ -1480,3 +1480,47 @@ main {
 .eur-edit-mobile-btn {
     display: none;
 }
+
+/* Botón lápiz para jugadores sin precio (desktop) */
+.est-edit-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 2px 3px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    transition: opacity 0.15s, color 0.15s, background 0.12s;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.est-cell:hover .est-edit-btn {
+    opacity: 1;
+}
+
+.est-edit-btn:hover {
+    color: var(--navy);
+    background: var(--surface-2);
+}
+
+/* Input estimado oculto por defecto, visible en modo edición */
+.no-price-row .est-input-wrap {
+    display: none;
+}
+
+.no-price-row--editing .est-input-wrap {
+    display: inline-flex;
+    align-items: center;
+}
+
+.no-price-row--editing .est-edit-btn {
+    display: none;
+}
+
+/* Botón lápiz mobile para jugadores sin precio */
+.est-edit-mobile-btn {
+    display: none;
+}

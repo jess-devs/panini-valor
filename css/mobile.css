@@ -165,8 +165,8 @@
         display: none;
     }
 
-    /* Input de estimación: 3ra fila en filas sin precio */
-    .no-price-row td:nth-child(4) {
+    /* Input de estimación: 3ra fila cuando una fila sin precio está editando */
+    .no-price-row--editing td:nth-child(4) {
         display: flex !important;
         align-items: center;
         justify-content: flex-end;
@@ -185,6 +185,29 @@
         order: 5;
         padding: 6px 0 0 !important;
         border: none;
+    }
+
+    /* Botón lápiz en la celda de precio estimado (mobile, jugadores sin precio) */
+    .est-edit-mobile-btn {
+        display: inline-flex;
+        align-items: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-light);
+        padding: 2px 4px;
+        border-radius: 4px;
+        line-height: 1;
+        opacity: 0.7;
+        flex-shrink: 0;
+    }
+
+    /* Celda de precio estimado con flex para alinear precio + lápiz */
+    .no-price-row td:nth-child(5) {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        justify-content: flex-end;
     }
 
     /* Botón lápiz en la celda de precio (mobile) */
