@@ -1,7 +1,19 @@
-import { downloadAndParse, getISO, getCountryDisplay, getPositionES } from './data.js';
-import { buildIndex, search } from './search.js';
-import { loadRate, saveRate, calcPrice, formatCRC, formatEUR, DEFAULT_RATE } from './converter.js';
-import { openDialog, closeDialog } from './transitions.js';
+import {
+  downloadAndParse,
+  getISO,
+  getCountryDisplay,
+  getPositionES,
+} from "./data.js";
+import { buildIndex, search } from "./search.js";
+import {
+  loadRate,
+  saveRate,
+  calcPrice,
+  formatCRC,
+  formatEUR,
+  DEFAULT_RATE,
+} from "./converter.js";
+import { openDialog, closeDialog } from "./transitions.js";
 
 /** @type {{ plus: string, check: string, x: string, user: string, userSm: string }} */
 const ICON = {
@@ -19,7 +31,7 @@ let searchIndex = [];
 /** @type {{ millones: number, colones: number }} */
 let currentRate = loadRate();
 
-const CART_KEY = 'panini_cart';
+const CART_KEY = "panini_cart";
 /** @type {object[]} */
 let cart = [];
 
@@ -27,12 +39,16 @@ let cart = [];
  * Devuelve los IDs del carrito como strings.
  * @returns {string[]}
  */
-function cartIds() { return cart.map(p => String(p.player_id)); }
+function cartIds() {
+  return cart.map((p) => String(p.player_id));
+}
 
 /**
  * Persiste los IDs del carrito en localStorage.
  */
-function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cartIds())); }
+function saveCart() {
+  localStorage.setItem(CART_KEY, JSON.stringify(cartIds()));
+}
 
 /**
  * Restaura el carrito desde localStorage cruzando con el catálogo cargado.
@@ -40,10 +56,12 @@ function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cartIds()));
  */
 function loadCart(allPlayers) {
   try {
-    const ids = new Set(JSON.parse(localStorage.getItem(CART_KEY) || '[]').map(String));
+    const ids = new Set(
+      JSON.parse(localStorage.getItem(CART_KEY) || "[]").map(String),
+    );
     if (!ids.size) return;
-    cart = allPlayers.filter(p => ids.has(String(p.player_id)));
-  } catch (_) { }
+    cart = allPlayers.filter((p) => ids.has(String(p.player_id)));
+  } catch (_) {}
 }
 
 /**
@@ -53,7 +71,7 @@ function loadCart(allPlayers) {
 function addToCart(playerId) {
   const id = String(playerId);
   if (cartIds().includes(id)) return;
-  const p = players.find(p => String(p.player_id) === id);
+  const p = players.find((p) => String(p.player_id) === id);
   if (!p) return;
   cart.push(p);
   saveCart();
@@ -61,8 +79,12 @@ function addToCart(playerId) {
   const btn = document.querySelector(`[data-add-id="${id}"]`);
   if (btn) {
     setAdded(btn);
-    btn.classList.add('add-btn--pop');
-    btn.addEventListener('animationend', () => btn.classList.remove('add-btn--pop'), { once: true });
+    btn.classList.add("add-btn--pop");
+    btn.addEventListener(
+      "animationend",
+      () => btn.classList.remove("add-btn--pop"),
+      { once: true },
+    );
   }
 }
 
@@ -73,18 +95,18 @@ function addToCart(playerId) {
  */
 function removeFromCart(playerId) {
   const id = String(playerId);
-  const row = $cartBody.querySelector(`[data-del-id="${id}"]`)?.closest('tr');
+  const row = $cartBody.querySelector(`[data-del-id="${id}"]`)?.closest("tr");
   if (row) {
-    row.classList.add('cart-row-out');
+    row.classList.add("cart-row-out");
     setTimeout(() => {
-      cart = cart.filter(p => String(p.player_id) !== id);
+      cart = cart.filter((p) => String(p.player_id) !== id);
       saveCart();
       renderCart();
       const btn = document.querySelector(`[data-add-id="${id}"]`);
       if (btn) setNotAdded(btn);
     }, 220);
   } else {
-    cart = cart.filter(p => String(p.player_id) !== id);
+    cart = cart.filter((p) => String(p.player_id) !== id);
     saveCart();
     renderCart();
     const btn = document.querySelector(`[data-add-id="${id}"]`);
@@ -92,27 +114,27 @@ function removeFromCart(playerId) {
   }
 }
 
-const $overlay = document.getElementById('overlay');
-const $progress = document.getElementById('progress-bar');
-const $loadMsg = document.getElementById('load-msg');
-const $loadError = document.getElementById('load-error');
-const $searchBox = document.getElementById('search');
-const $results = document.getElementById('results');
-const $configBtn = document.getElementById('config-btn');
-const $modal = document.getElementById('modal');
-const $modalClose = document.getElementById('modal-close');
-const $fMillones = document.getElementById('f-millones');
-const $fColones = document.getElementById('f-colones');
-const $saveBtn = document.getElementById('save-btn');
-const $resetBtn = document.getElementById('reset-btn');
-const $cartSection = document.getElementById('cart-section');
-const $cartBody = document.getElementById('cart-body');
-const $cartTotal = document.getElementById('cart-total');
-const $clearCart = document.getElementById('clear-cart');
-const $cartCount = document.getElementById('cart-count');
-const $disclaimerDialog = document.getElementById('disclaimer-dialog');
-const $disclaimerClose = document.getElementById('disclaimer-close');
-const $disclaimerTrigger = document.getElementById('disclaimer-trigger');
+const $overlay = document.getElementById("overlay");
+const $progress = document.getElementById("progress-bar");
+const $loadMsg = document.getElementById("load-msg");
+const $loadError = document.getElementById("load-error");
+const $searchBox = document.getElementById("search");
+const $results = document.getElementById("results");
+const $configBtn = document.getElementById("config-btn");
+const $modal = document.getElementById("modal");
+const $modalClose = document.getElementById("modal-close");
+const $fMillones = document.getElementById("f-millones");
+const $fColones = document.getElementById("f-colones");
+const $saveBtn = document.getElementById("save-btn");
+const $resetBtn = document.getElementById("reset-btn");
+const $cartSection = document.getElementById("cart-section");
+const $cartBody = document.getElementById("cart-body");
+const $cartTotal = document.getElementById("cart-total");
+const $clearCart = document.getElementById("clear-cart");
+const $cartCount = document.getElementById("cart-count");
+const $disclaimerDialog = document.getElementById("disclaimer-dialog");
+const $disclaimerClose = document.getElementById("disclaimer-close");
+const $disclaimerTrigger = document.getElementById("disclaimer-trigger");
 
 /**
  * Genera el HTML de una tarjeta skeleton para el estado de carga.
@@ -135,14 +157,14 @@ function skeletonCard() {
  * @param {number} [n=6]
  */
 function showSkeletons(n = 6) {
-  $results.innerHTML = Array(n).fill(skeletonCard()).join('');
+  $results.innerHTML = Array(n).fill(skeletonCard()).join("");
 }
 
 /**
  * Limpia el contenedor de resultados.
  */
 function hideSkeletons() {
-  $results.innerHTML = '';
+  $results.innerHTML = "";
 }
 
 /**
@@ -151,30 +173,31 @@ function hideSkeletons() {
  */
 async function init() {
   try {
-    players = await downloadAndParse(pct => {
-      $progress.style.width = (pct * 100) + '%';
-      if (pct >= 1) $loadMsg.textContent = 'Procesando jugadores…';
+    players = await downloadAndParse((pct) => {
+      $progress.style.width = pct * 100 + "%";
+      if (pct >= 1) $loadMsg.textContent = "Procesando jugadores…";
     });
     searchIndex = buildIndex(players);
     loadCart(players);
 
-    $overlay.classList.add('hidden');
+    $overlay.classList.add("hidden");
     $searchBox.focus();
 
     renderCart();
     await maybeShowDisclaimer();
   } catch (err) {
-    $loadMsg.textContent = '';
+    $loadMsg.textContent = "";
     $loadError.textContent =
-      'No se pudo cargar el catálogo: ' + err.message +
-      '. Verificá tu conexión y recargá la página.';
+      "No se pudo cargar el catálogo: " +
+      err.message +
+      ". Verificá tu conexión y recargá la página.";
   }
 }
 
-$searchBox.addEventListener('input', () => {
+$searchBox.addEventListener("input", () => {
   const query = $searchBox.value;
   if (!query || query.trim().length < 2) {
-    $results.innerHTML = '';
+    $results.innerHTML = "";
     return;
   }
   const found = search(query, searchIndex, players);
@@ -187,13 +210,18 @@ $searchBox.addEventListener('input', () => {
  * @param {string}   query
  */
 function renderResults(found, query) {
-  if (!query || query.trim().length < 2) { $results.innerHTML = ''; return; }
+  if (!query || query.trim().length < 2) {
+    $results.innerHTML = "";
+    return;
+  }
   if (found.length === 0) {
     $results.innerHTML = `<p class="empty-msg">No se encontró ningún jugador con ese nombre en las 48 selecciones del Mundial 2026.</p>`;
     return;
   }
   const inCart = new Set(cartIds());
-  $results.innerHTML = found.map(p => cardHTML(p, inCart.has(String(p.player_id)))).join('');
+  $results.innerHTML = found
+    .map((p) => cardHTML(p, inCart.has(String(p.player_id))))
+    .join("");
 }
 
 /**
@@ -207,14 +235,16 @@ function cardHTML(p, added) {
   const country = getCountryDisplay(p.country_of_citizenship);
   const pos = getPositionES(p.position);
   const iso = getISO(p.country_of_citizenship);
-  const imgSrc = p.image_url || '';
+  const imgSrc = p.image_url || "";
 
   const photo = imgSrc
     ? `<img src="${imgSrc}" alt="${p.name}" class="player-img" loading="lazy"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-    : '';
-  const ph = `<div class="player-placeholder" ${imgSrc ? 'style="display:none"' : ''}>${ICON.user}</div>`;
-  const dot = iso ? `<div class="player-flag-dot"><span class="fi fi-${iso}"></span></div>` : '';
+    : "";
+  const ph = `<div class="player-placeholder" ${imgSrc ? 'style="display:none"' : ""}>${ICON.user}</div>`;
+  const dot = iso
+    ? `<div class="player-flag-dot"><span class="fi fi-${iso}"></span></div>`
+    : "";
 
   return `
   <div class="card">
@@ -230,8 +260,8 @@ function cardHTML(p, added) {
         <span class="player-crc">${formatCRC(price)}</span>
       </div>
     </div>
-    <button class="add-btn${added ? ' add-btn--added' : ''}" data-add-id="${p.player_id}"
-      title="${added ? 'Ya está en tu lista' : 'Agregar a mi lista'}" aria-label="${added ? 'Agregado' : 'Agregar'}">
+    <button class="add-btn${added ? " add-btn--added" : ""}" data-add-id="${p.player_id}"
+      title="${added ? "Ya está en tu lista" : "Agregar a mi lista"}" aria-label="${added ? "Agregado" : "Agregar"}">
       ${added ? ICON.check : ICON.plus}
     </button>
   </div>`;
@@ -243,8 +273,8 @@ function cardHTML(p, added) {
  */
 function setAdded(btn) {
   btn.innerHTML = ICON.check;
-  btn.classList.add('add-btn--added');
-  btn.title = 'Ya está en tu lista';
+  btn.classList.add("add-btn--added");
+  btn.title = "Ya está en tu lista";
 }
 
 /**
@@ -253,12 +283,12 @@ function setAdded(btn) {
  */
 function setNotAdded(btn) {
   btn.innerHTML = ICON.plus;
-  btn.classList.remove('add-btn--added');
-  btn.title = 'Agregar a mi lista';
+  btn.classList.remove("add-btn--added");
+  btn.title = "Agregar a mi lista";
 }
 
-$results.addEventListener('click', e => {
-  const btn = e.target.closest('[data-add-id]');
+$results.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-add-id]");
   if (btn) addToCart(btn.dataset.addId);
 });
 
@@ -269,58 +299,62 @@ function renderCart() {
   $cartCount.textContent = cart.length;
 
   if (!cart.length) {
-    $cartSection.classList.add('cart--empty');
-    $cartTotal.textContent = '—';
+    $cartSection.classList.add("cart--empty");
+    $cartTotal.textContent = "—";
     return;
   }
 
-  $cartSection.classList.remove('cart--empty');
+  $cartSection.classList.remove("cart--empty");
   let subtotal = 0;
 
-  $cartBody.innerHTML = cart.map(p => {
-    const price = calcPrice(p.market_value_in_eur, currentRate);
-    subtotal += price;
-    const country = getCountryDisplay(p.country_of_citizenship);
-    const pos = getPositionES(p.position);
-    const iso = getISO(p.country_of_citizenship);
-    const imgSrc = p.image_url || '';
+  $cartBody.innerHTML = cart
+    .map((p) => {
+      const price = calcPrice(p.market_value_in_eur, currentRate);
+      subtotal += price;
+      const country = getCountryDisplay(p.country_of_citizenship);
+      const pos = getPositionES(p.position);
+      const iso = getISO(p.country_of_citizenship);
+      const imgSrc = p.image_url || "";
 
-    const av = imgSrc
-      ? `<img src="${imgSrc}" alt="${p.name}" class="cart-avatar" loading="lazy"
+      const av = imgSrc
+        ? `<img src="${imgSrc}" alt="${p.name}" class="cart-avatar" loading="lazy"
             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      : '';
-    const avPh = `<div class="cart-avatar-ph" ${imgSrc ? 'style="display:none"' : ''}>${ICON.userSm}</div>`;
-    const dot = iso ? `<div class="cart-flag-dot"><span class="fi fi-${iso}"></span></div>` : '';
+        : "";
+      const avPh = `<div class="cart-avatar-ph" ${imgSrc ? 'style="display:none"' : ""}>${ICON.userSm}</div>`;
+      const dot = iso
+        ? `<div class="cart-flag-dot"><span class="fi fi-${iso}"></span></div>`
+        : "";
 
-    return `<tr>
+      return `<tr>
       <td><div class="cart-player-cell">
         <div class="cart-avatar-wrap">${av}${avPh}${dot}</div>
         <span class="cart-player-name">${p.name}</span>
       </div></td>
-      <td class="cart-country-cell">${iso ? `<span class="fi fi-${iso}"></span>` : ''}${country}</td>
+      <td class="cart-country-cell">${iso ? `<span class="fi fi-${iso}"></span>` : ""}${country}</td>
       <td><span class="cart-pos-badge">${pos}</span></td>
       <td class="cell-eur">${formatEUR(p.market_value_in_eur)}</td>
       <td class="cell-crc">${formatCRC(price)}</td>
       <td><button class="del-btn" data-del-id="${p.player_id}" aria-label="Eliminar ${p.name}">${ICON.x}</button></td>
     </tr>`;
-  }).join('');
+    })
+    .join("");
 
   $cartTotal.textContent = formatCRC(subtotal);
 }
 
-$cartBody.addEventListener('click', e => {
-  const btn = e.target.closest('[data-del-id]');
+$cartBody.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-del-id]");
   if (btn) removeFromCart(btn.dataset.delId);
 });
 
-$clearCart.addEventListener('click', () => {
+$clearCart.addEventListener("click", () => {
   cart = [];
   saveCart();
   renderCart();
-  document.querySelectorAll('.add-btn--added').forEach(setNotAdded);
+  document.querySelectorAll(".add-btn--added").forEach(setNotAdded);
 });
 
-const DISCLAIMER_KEY = 'panini_disclaimer_v1';
+const DISCLAIMER_KEY = "panini_disclaimer_v1";
 
 /**
  * Muestra el disclaimer si el usuario no lo ha visto antes.
@@ -328,16 +362,16 @@ const DISCLAIMER_KEY = 'panini_disclaimer_v1';
  */
 async function maybeShowDisclaimer() {
   if (localStorage.getItem(DISCLAIMER_KEY)) return;
-  await new Promise(r => setTimeout(r, 350));
+  await new Promise((r) => setTimeout(r, 350));
   await openDialog($disclaimerDialog, $disclaimerTrigger);
 }
 
-$disclaimerClose.addEventListener('click', async () => {
-  localStorage.setItem(DISCLAIMER_KEY, '1');
+$disclaimerClose.addEventListener("click", async () => {
+  localStorage.setItem(DISCLAIMER_KEY, "1");
   await closeDialog($disclaimerDialog);
 });
 
-$disclaimerTrigger.addEventListener('click', async () => {
+$disclaimerTrigger.addEventListener("click", async () => {
   await openDialog($disclaimerDialog, $disclaimerTrigger);
 });
 
@@ -345,13 +379,15 @@ $disclaimerTrigger.addEventListener('click', async () => {
  * El cierre con Escape lo maneja <dialog> natively, pero igualmente
  * necesitamos persistir el flag para no mostrar el disclaimer de nuevo.
  */
-$disclaimerDialog.addEventListener('close', () => {
-  localStorage.setItem(DISCLAIMER_KEY, '1');
+$disclaimerDialog.addEventListener("close", () => {
+  localStorage.setItem(DISCLAIMER_KEY, "1");
 });
 
-$configBtn.addEventListener('click', openModal);
-$modalClose.addEventListener('click', closeModal);
-$modal.addEventListener('click', e => { if (e.target === $modal) closeModal(); });
+$configBtn.addEventListener("click", openModal);
+$modalClose.addEventListener("click", closeModal);
+$modal.addEventListener("click", (e) => {
+  if (e.target === $modal) closeModal();
+});
 
 /**
  * Abre el modal de configuración de tasa y pre-rellena los campos.
@@ -359,7 +395,7 @@ $modal.addEventListener('click', e => { if (e.target === $modal) closeModal(); }
 function openModal() {
   $fMillones.value = currentRate.millones;
   $fColones.value = currentRate.colones;
-  $modal.classList.remove('hidden', 'modal-closing');
+  $modal.classList.remove("hidden", "modal-closing");
   $fMillones.focus();
 }
 
@@ -367,25 +403,31 @@ function openModal() {
  * Cierra el modal de configuración con animación de salida.
  */
 function closeModal() {
-  $modal.classList.add('modal-closing');
+  $modal.classList.add("modal-closing");
   setTimeout(() => {
-    $modal.classList.add('hidden');
-    $modal.classList.remove('modal-closing');
+    $modal.classList.add("hidden");
+    $modal.classList.remove("modal-closing");
   }, 210);
 }
 
-$saveBtn.addEventListener('click', () => {
+$saveBtn.addEventListener("click", () => {
   const m = parseFloat($fMillones.value);
   const c = parseFloat($fColones.value);
-  if (!m || !c || m <= 0 || c <= 0) { alert('Los valores deben ser números positivos.'); return; }
+  if (!m || !c || m <= 0 || c <= 0) {
+    alert("Los valores deben ser números positivos.");
+    return;
+  }
   currentRate = { millones: m, colones: c };
   saveRate(currentRate);
   closeModal();
-  renderResults(search($searchBox.value, searchIndex, players), $searchBox.value);
+  renderResults(
+    search($searchBox.value, searchIndex, players),
+    $searchBox.value,
+  );
   renderCart();
 });
 
-$resetBtn.addEventListener('click', () => {
+$resetBtn.addEventListener("click", () => {
   $fMillones.value = DEFAULT_RATE.millones;
   $fColones.value = DEFAULT_RATE.colones;
 });

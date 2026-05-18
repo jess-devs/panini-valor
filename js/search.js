@@ -1,4 +1,4 @@
-import { getCountryDisplay } from './data.js';
+import { getCountryDisplay } from "./data.js";
 
 /**
  * Normaliza un string: minúsculas y sin diacríticos.
@@ -6,11 +6,8 @@ import { getCountryDisplay } from './data.js';
  * @returns {string}
  */
 function normalize(str) {
-  if (!str) return '';
-  return str
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '');
+  if (!str) return "";
+  return str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }
 
 /**
@@ -20,10 +17,12 @@ function normalize(str) {
  * @returns {string[]}
  */
 export function buildIndex(players) {
-  return players.map(p => {
-    const name    = normalize(p.name || '');
-    const country = normalize(p.country_of_citizenship || '');
-    const display = normalize(getCountryDisplay(p.country_of_citizenship || ''));
+  return players.map((p) => {
+    const name = normalize(p.name || "");
+    const country = normalize(p.country_of_citizenship || "");
+    const display = normalize(
+      getCountryDisplay(p.country_of_citizenship || ""),
+    );
     return `${name} ${country} ${display}`;
   });
 }

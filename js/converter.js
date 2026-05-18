@@ -1,7 +1,7 @@
 /** @type {{ millones: number, colones: number }} */
 export const DEFAULT_RATE = { millones: 10, colones: 100 };
 
-const STORAGE_KEY = 'panini_rate';
+const STORAGE_KEY = "panini_rate";
 
 /**
  * Lee la tasa guardada en localStorage.
@@ -14,7 +14,7 @@ export function loadRate() {
       const rate = JSON.parse(saved);
       if (rate.millones > 0 && rate.colones > 0) return rate;
     }
-  } catch (_) { }
+  } catch (_) {}
   return { ...DEFAULT_RATE };
 }
 
@@ -44,7 +44,7 @@ export function calcPrice(valorEUR, rate) {
  * @returns {string} Ej: "₡1,800"
  */
 export function formatCRC(n) {
-  return '₡' + n.toLocaleString('es-CR');
+  return "₡" + n.toLocaleString("es-CR");
 }
 
 /**
@@ -53,8 +53,8 @@ export function formatCRC(n) {
  * @returns {string} Ej: "€180M", "€500K"
  */
 export function formatEUR(n) {
-  if (!n || n <= 0) return '€0';
+  if (!n || n <= 0) return "€0";
   if (n >= 1_000_000) return `€${(n / 1_000_000).toFixed(0)}M`;
   if (n >= 1_000) return `€${(n / 1_000).toFixed(0)}K`;
-  return '€' + n.toLocaleString('es-CR');
+  return "€" + n.toLocaleString("es-CR");
 }

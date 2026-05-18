@@ -1,4 +1,4 @@
-export const CSV_URL = 'data/players.csv.gz';
+export const CSV_URL = "data/players.csv.gz";
 
 /**
  * Países clasificados al Mundial 2026, tal como aparecen
@@ -6,16 +6,54 @@ export const CSV_URL = 'data/players.csv.gz';
  * @type {Set<string>}
  */
 const WC2026_COUNTRIES = new Set([
-  'Argentina', 'Brazil', 'Colombia', 'Uruguay', 'Ecuador', 'Paraguay',
-  'Spain', 'France', 'Germany', 'Portugal', 'Netherlands', 'Belgium',
-  'Croatia', 'Switzerland', 'Norway', 'Scotland', 'Austria', 'England',
-  'Bosnia-Herzegovina', 'Sweden', 'Turkey', 'Czech Republic',
-  'United States', 'Mexico', 'Canada', 'Haiti', 'Panama', 'Curacao',
-  'Morocco', 'Egypt', 'Algeria', 'Ghana', "Cote d'Ivoire", 'Tunisia',
-  'Senegal', 'South Africa', 'DR Congo', 'Cape Verde',
-  'Japan', 'Korea, South', 'Australia', 'Iran', 'Saudi Arabia',
-  'Qatar', 'Uzbekistan', 'Jordan', 'Iraq',
-  'New Zealand',
+  "Argentina",
+  "Brazil",
+  "Colombia",
+  "Uruguay",
+  "Ecuador",
+  "Paraguay",
+  "Spain",
+  "France",
+  "Germany",
+  "Portugal",
+  "Netherlands",
+  "Belgium",
+  "Croatia",
+  "Switzerland",
+  "Norway",
+  "Scotland",
+  "Austria",
+  "England",
+  "Bosnia-Herzegovina",
+  "Sweden",
+  "Turkey",
+  "Czech Republic",
+  "United States",
+  "Mexico",
+  "Canada",
+  "Haiti",
+  "Panama",
+  "Curacao",
+  "Morocco",
+  "Egypt",
+  "Algeria",
+  "Ghana",
+  "Cote d'Ivoire",
+  "Tunisia",
+  "Senegal",
+  "South Africa",
+  "DR Congo",
+  "Cape Verde",
+  "Japan",
+  "Korea, South",
+  "Australia",
+  "Iran",
+  "Saudi Arabia",
+  "Qatar",
+  "Uzbekistan",
+  "Jordan",
+  "Iraq",
+  "New Zealand",
 ]);
 
 /**
@@ -23,11 +61,11 @@ const WC2026_COUNTRIES = new Set([
  * @type {Record<string, string>}
  */
 export const COUNTRY_DISPLAY = {
-  'Korea, South':      'Corea del Sur',
-  "Cote d'Ivoire":     'Costa de Marfil',
-  'DR Congo':          'R.D. Congo',
-  'Bosnia-Herzegovina':'Bosnia y Herzegovina',
-  'Czech Republic':    'Chequia',
+  "Korea, South": "Corea del Sur",
+  "Cote d'Ivoire": "Costa de Marfil",
+  "DR Congo": "R.D. Congo",
+  "Bosnia-Herzegovina": "Bosnia y Herzegovina",
+  "Czech Republic": "Chequia",
 };
 
 /**
@@ -35,19 +73,54 @@ export const COUNTRY_DISPLAY = {
  * @type {Record<string, string>}
  */
 const ISO_CODES = {
-  Argentina: 'ar', Brazil: 'br', Colombia: 'co', Uruguay: 'uy',
-  Ecuador: 'ec', Paraguay: 'py', Spain: 'es', France: 'fr',
-  Germany: 'de', Portugal: 'pt', Netherlands: 'nl', Belgium: 'be',
-  Croatia: 'hr', Switzerland: 'ch', Norway: 'no', Scotland: 'gb-sct',
-  Austria: 'at', England: 'gb-eng', 'Bosnia-Herzegovina': 'ba',
-  Sweden: 'se', Turkey: 'tr', 'Czech Republic': 'cz',
-  'United States': 'us', Mexico: 'mx', Canada: 'ca', Haiti: 'ht',
-  Panama: 'pa', Curacao: 'cw', Morocco: 'ma', Egypt: 'eg',
-  Algeria: 'dz', Ghana: 'gh', "Cote d'Ivoire": 'ci', Tunisia: 'tn',
-  Senegal: 'sn', 'South Africa': 'za', 'DR Congo': 'cd',
-  'Cape Verde': 'cv', Japan: 'jp', 'Korea, South': 'kr',
-  Australia: 'au', Iran: 'ir', 'Saudi Arabia': 'sa', Qatar: 'qa',
-  Uzbekistan: 'uz', Jordan: 'jo', Iraq: 'iq', 'New Zealand': 'nz',
+  Argentina: "ar",
+  Brazil: "br",
+  Colombia: "co",
+  Uruguay: "uy",
+  Ecuador: "ec",
+  Paraguay: "py",
+  Spain: "es",
+  France: "fr",
+  Germany: "de",
+  Portugal: "pt",
+  Netherlands: "nl",
+  Belgium: "be",
+  Croatia: "hr",
+  Switzerland: "ch",
+  Norway: "no",
+  Scotland: "gb-sct",
+  Austria: "at",
+  England: "gb-eng",
+  "Bosnia-Herzegovina": "ba",
+  Sweden: "se",
+  Turkey: "tr",
+  "Czech Republic": "cz",
+  "United States": "us",
+  Mexico: "mx",
+  Canada: "ca",
+  Haiti: "ht",
+  Panama: "pa",
+  Curacao: "cw",
+  Morocco: "ma",
+  Egypt: "eg",
+  Algeria: "dz",
+  Ghana: "gh",
+  "Cote d'Ivoire": "ci",
+  Tunisia: "tn",
+  Senegal: "sn",
+  "South Africa": "za",
+  "DR Congo": "cd",
+  "Cape Verde": "cv",
+  Japan: "jp",
+  "Korea, South": "kr",
+  Australia: "au",
+  Iran: "ir",
+  "Saudi Arabia": "sa",
+  Qatar: "qa",
+  Uzbekistan: "uz",
+  Jordan: "jo",
+  Iraq: "iq",
+  "New Zealand": "nz",
 };
 
 /**
@@ -56,7 +129,7 @@ const ISO_CODES = {
  * @returns {string}
  */
 export function getISO(country) {
-  return ISO_CODES[country] || '';
+  return ISO_CODES[country] || "";
 }
 
 /**
@@ -70,10 +143,10 @@ export function getCountryDisplay(country) {
 
 /** @type {Record<string, string>} */
 const POSITION_ES = {
-  'Attack':     'Delantero',
-  'Midfield':   'Mediocampista',
-  'Defender':   'Defensa',
-  'Goalkeeper': 'Portero',
+  Attack: "Delantero",
+  Midfield: "Mediocampista",
+  Defender: "Defensa",
+  Goalkeeper: "Portero",
 };
 
 /**
@@ -82,7 +155,7 @@ const POSITION_ES = {
  * @returns {string}
  */
 export function getPositionES(position) {
-  return POSITION_ES[position] || position || '—';
+  return POSITION_ES[position] || position || "—";
 }
 
 /**
@@ -93,13 +166,16 @@ export function getPositionES(position) {
  */
 export async function downloadAndParse(onProgress) {
   const response = await fetch(CSV_URL);
-  if (!response.ok) throw new Error(`Error al descargar datos: ${response.status}`);
+  if (!response.ok)
+    throw new Error(`Error al descargar datos: ${response.status}`);
 
-  const contentLength = response.headers.get('Content-Length');
+  const contentLength = response.headers.get("Content-Length");
   const total = contentLength ? parseInt(contentLength, 10) : 0;
   let loaded = 0;
 
-  const decompressed = response.body.pipeThrough(new DecompressionStream('gzip'));
+  const decompressed = response.body.pipeThrough(
+    new DecompressionStream("gzip"),
+  );
   const reader = decompressed.getReader();
   const chunks = [];
 
@@ -111,13 +187,13 @@ export async function downloadAndParse(onProgress) {
     if (total > 0) onProgress(Math.min(loaded / total, 1));
   }
 
-  const text = new TextDecoder('utf-8').decode(
+  const text = new TextDecoder("utf-8").decode(
     chunks.reduce((acc, c) => {
       const merged = new Uint8Array(acc.length + c.length);
       merged.set(acc);
       merged.set(c, acc.length);
       return merged;
-    }, new Uint8Array(0))
+    }, new Uint8Array(0)),
   );
 
   onProgress(1);
@@ -131,7 +207,7 @@ export async function downloadAndParse(onProgress) {
         resolve(filterWC2026(data));
       },
       error(err) {
-        reject(new Error('Error al procesar los datos: ' + err.message));
+        reject(new Error("Error al procesar los datos: " + err.message));
       },
     });
   });
@@ -144,8 +220,8 @@ export async function downloadAndParse(onProgress) {
  * @returns {object[]}
  */
 function filterWC2026(rows) {
-  return rows.filter(row => {
-    const country = (row.country_of_citizenship || '').trim();
+  return rows.filter((row) => {
+    const country = (row.country_of_citizenship || "").trim();
     const value = row.market_value_in_eur;
     return WC2026_COUNTRIES.has(country) && value && value > 0;
   });

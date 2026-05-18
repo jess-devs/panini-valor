@@ -1,223 +1,330 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cómo usar · Mi Postal</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css"
+        />
+        <link rel="stylesheet" href="css/pages.css" />
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cómo usar · Panini Valor</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
-  <link rel="stylesheet" href="css/pages.css">
-</head>
+    <body>
+        <header class="page-header">
+            <a href="index.html" class="page-header-brand">
+                <img
+                    src="files/img/2026_FIFA_World_Cup_emblem.svg.png"
+                    alt="FIFA World Cup 2026"
+                    class="overlay-icon"
+                />
+                <div>
+                    <span class="page-header-title"
+                        >Mi Postal
+                        <span>Mundial 2026</span>
+                    </span>
+                </div>
+            </a>
+            <a href="index.html" class="page-header-back">
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Volver
+            </a>
+        </header>
 
-<body>
-
-  <header class="page-header">
-    <a href="index.html" class="page-header-brand">
-      <svg class="page-header-icon" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="14" stroke="#e8a020" stroke-width="2" />
-        <path d="M16 4 L19 11 L26 11 L20.5 15.5 L22.5 22.5 L16 18 L9.5 22.5 L11.5 15.5 L6 11 L13 11 Z" fill="#e8a020" />
-      </svg>
-      <div>
-        <span class="page-header-title">Panini Valor
-          <span>Mundial 2026</span>
-        </span>
-      </div>
-    </a>
-    <a href="index.html" class="page-header-back">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-        stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 18 9 12 15 6" />
-      </svg>
-      Volver
-    </a>
-  </header>
-
-  <div class="page-hero">
-    <p class="page-hero-kicker">Guía de uso</p>
-    <h1 class="page-hero-title">Cómo usar Panini Valor</h1>
-    <p class="page-hero-sub">En menos de un minuto podés tener el precio de cualquier postal del álbum del Mundial 2026.
-    </p>
-  </div>
-
-  <main class="page-content">
-
-    <section class="content-section">
-      <p class="section-label">Paso a paso</p>
-      <h2 class="section-title">Es muy fácil</h2>
-
-      <div class="steps">
-
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <p class="step-title">Esperá que cargue el catálogo</p>
-            <p class="step-desc">Al abrir la app, se descarga automáticamente el catálogo completo de jugadores del
-              Mundial 2026 (~4 MB). Solo toma unos segundos. Verás una barra de progreso mientras carga.</p>
-          </div>
-        </div>
-
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <p class="step-title">Buscá el jugador</p>
-            <p class="step-desc">Escribí el nombre del jugador en el campo de búsqueda. Podés escribir con o sin tildes,
-              en mayúsculas o minúsculas, y con el nombre parcial. Por ejemplo: "mbappe", "haaland", "lamine" o "vini".
+        <div class="page-hero">
+            <p class="page-hero-kicker">Guía de uso</p>
+            <h1 class="page-hero-title">Cómo usar Mi Postal</h1>
+            <p class="page-hero-sub">
+                En menos de un minuto podés tener el precio de cualquier postal
+                del álbum del Mundial 2026.
             </p>
-          </div>
         </div>
 
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <p class="step-title">Mirá el precio de la postal</p>
-            <p class="step-desc">Cada tarjeta de resultado muestra el nombre, selección, posición, valor de mercado en
-              euros y el <strong>precio de la postal en colones</strong> resaltado en dorado. La bandera de cada país
-              aparece como ícono circular en la foto.</p>
-          </div>
-        </div>
+        <main class="page-content">
+            <section class="content-section">
+                <p class="section-label">Paso a paso</p>
+                <h2 class="section-title">Es muy fácil</h2>
 
-        <div class="step">
-          <div class="step-num">4</div>
-          <div class="step-body">
-            <p class="step-title">Agregá jugadores a tu lista</p>
-            <p class="step-desc">Presioná el botón <strong>+</strong> en cualquier tarjeta para agregar al jugador a tu
-              lista de postales. El botón se vuelve dorado para indicar que ya fue agregado. La lista persiste aunque
-              recargués la página.</p>
-          </div>
-        </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num">1</div>
+                        <div class="step-body">
+                            <p class="step-title">
+                                Esperá que cargue el catálogo
+                            </p>
+                            <p class="step-desc">
+                                Al abrir la app, se descarga automáticamente el
+                                catálogo completo de jugadores del Mundial 2026
+                                (~4 MB). Solo toma unos segundos. Verás una
+                                barra de progreso mientras carga.
+                            </p>
+                        </div>
+                    </div>
 
-        <div class="step">
-          <div class="step-num">5</div>
-          <div class="step-body">
-            <p class="step-title">Revisá el subtotal</p>
-            <p class="step-desc">En la sección <em>Mi lista de postales</em> verás todos los jugadores agregados con su
-              precio individual y el <strong>subtotal acumulado</strong> al final. Podés eliminar jugadores con el botón
-              ✕ o vaciar toda la lista.</p>
-          </div>
-        </div>
+                    <div class="step">
+                        <div class="step-num">2</div>
+                        <div class="step-body">
+                            <p class="step-title">Buscá el jugador</p>
+                            <p class="step-desc">
+                                Escribí el nombre del jugador en el campo de
+                                búsqueda. Podés escribir con o sin tildes, en
+                                mayúsculas o minúsculas, y con el nombre
+                                parcial. Por ejemplo: "mbappe", "haaland",
+                                "lamine" o "vini".
+                            </p>
+                        </div>
+                    </div>
 
-        <div class="step">
-          <div class="step-num">6</div>
-          <div class="step-body">
-            <p class="step-title">Ajustá la tasa si querés</p>
-            <p class="step-desc">Por defecto: €10M = ₡100. Si querés cambiar esa equivalencia, presioná
-              <strong>Configurar tasa</strong> en el encabezado. Los precios se recalculan al instante y la tasa se
-              guarda para la próxima visita.</p>
-          </div>
-        </div>
+                    <div class="step">
+                        <div class="step-num">3</div>
+                        <div class="step-body">
+                            <p class="step-title">
+                                Mirá el precio de la postal
+                            </p>
+                            <p class="step-desc">
+                                Cada tarjeta de resultado muestra el nombre,
+                                selección, posición, valor de mercado en euros y
+                                el
+                                <strong>precio de la postal en colones</strong>
+                                resaltado en dorado. La bandera de cada país
+                                aparece como ícono circular en la foto.
+                            </p>
+                        </div>
+                    </div>
 
-      </div>
-    </section>
+                    <div class="step">
+                        <div class="step-num">4</div>
+                        <div class="step-body">
+                            <p class="step-title">
+                                Agregá jugadores a tu lista
+                            </p>
+                            <p class="step-desc">
+                                Presioná el botón <strong>+</strong> en
+                                cualquier tarjeta para agregar al jugador a tu
+                                lista de postales. El botón se vuelve dorado
+                                para indicar que ya fue agregado. La lista
+                                persiste aunque recargués la página.
+                            </p>
+                        </div>
+                    </div>
 
-    <section class="content-section">
-      <p class="section-label">Ejemplo</p>
-      <h2 class="section-title">¿Cómo se calcula el precio?</h2>
-      <div class="section-body">
-        <p>La fórmula es proporcional al valor de mercado del jugador según Transfermarkt:</p>
-      </div>
+                    <div class="step">
+                        <div class="step-num">5</div>
+                        <div class="step-body">
+                            <p class="step-title">Revisá el subtotal</p>
+                            <p class="step-desc">
+                                En la sección
+                                <em>Mi lista de postales</em> verás todos los
+                                jugadores agregados con su precio individual y
+                                el <strong>subtotal acumulado</strong> al final.
+                                Podés eliminar jugadores con el botón ✕ o vaciar
+                                toda la lista.
+                            </p>
+                        </div>
+                    </div>
 
-      <div class="formula-box">
-        <div class="formula-row">
-          <span class="formula-label">Fórmula</span>
-          <span class="formula-expr">precio ₡ = (valor € ÷ tasa €) × tasa ₡</span>
-        </div>
-        <div class="formula-divider"></div>
-        <div class="formula-examples">
-          <div class="formula-example">
-            <div class="formula-player">
-              <span class="fi fi-fr"></span>
-              <strong>Kylian Mbappé</strong>
+                    <div class="step">
+                        <div class="step-num">6</div>
+                        <div class="step-body">
+                            <p class="step-title">Ajustá la tasa si querés</p>
+                            <p class="step-desc">
+                                Por defecto: €10M = ₡100. Si querés cambiar esa
+                                equivalencia, presioná
+                                <strong>Configurar tasa</strong> en el
+                                encabezado. Los precios se recalculan al
+                                instante y la tasa se guarda para la próxima
+                                visita.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-section">
+                <p class="section-label">Ejemplo</p>
+                <h2 class="section-title">¿Cómo se calcula el precio?</h2>
+                <div class="section-body">
+                    <p>
+                        La fórmula es proporcional al valor de mercado del
+                        jugador según Transfermarkt:
+                    </p>
+                </div>
+
+                <div class="formula-box">
+                    <div class="formula-row">
+                        <span class="formula-label">Fórmula</span>
+                        <span class="formula-expr"
+                            >precio ₡ = (valor € ÷ tasa €) × tasa ₡</span
+                        >
+                    </div>
+                    <div class="formula-divider"></div>
+                    <div class="formula-examples">
+                        <div class="formula-example">
+                            <div class="formula-player">
+                                <span class="fi fi-fr"></span>
+                                <strong>Kylian Mbappé</strong>
+                            </div>
+                            <div class="formula-calc">
+                                €180M ÷ €10M × ₡100 =
+                                <strong class="formula-result">₡1,800</strong>
+                            </div>
+                        </div>
+                        <div class="formula-example">
+                            <div class="formula-player">
+                                <span class="fi fi-no"></span>
+                                <strong>Erling Haaland</strong>
+                            </div>
+                            <div class="formula-calc">
+                                €200M ÷ €10M × ₡100 =
+                                <strong class="formula-result">₡2,000</strong>
+                            </div>
+                        </div>
+                        <div class="formula-example">
+                            <div class="formula-player">
+                                <span class="fi fi-es"></span>
+                                <strong>Lamine Yamal</strong>
+                            </div>
+                            <div class="formula-calc">
+                                €120M ÷ €10M × ₡100 =
+                                <strong class="formula-result">₡1,200</strong>
+                            </div>
+                        </div>
+                        <div class="formula-example">
+                            <div class="formula-player">
+                                <span class="fi fi-qa"></span>
+                                <strong>Jugador pequeño</strong>
+                            </div>
+                            <div class="formula-calc">
+                                cualquier valor &lt; €10M = mínimo
+                                <strong class="formula-result">₡100</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-section">
+                <p class="section-label">Preguntas frecuentes</p>
+                <h2 class="section-title">FAQ</h2>
+
+                <div class="faq-list">
+                    <div class="faq-item">
+                        <p class="faq-q">
+                            ¿Por qué no encuentro a algún jugador?
+                        </p>
+                        <p class="faq-a">
+                            El catálogo incluye los jugadores con mayor valor de
+                            mercado de cada selección clasificada al Mundial
+                            2026. Jugadores con valor de mercado cero o sin
+                            registro en Transfermarkt no aparecen.
+                        </p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">¿Los datos son en tiempo real?</p>
+                        <p class="faq-a">
+                            El dataset se actualiza semanalmente desde
+                            Transfermarkt. El archivo que descarga la app puede
+                            tener hasta una semana de retraso.
+                        </p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">
+                            ¿Funciona sin internet después de cargar?
+                        </p>
+                        <p class="faq-a">
+                            Sí. Una vez que el catálogo cargó, la búsqueda y
+                            todos los cálculos funcionan sin conexión. Solo la
+                            carga inicial requiere internet.
+                        </p>
+                    </div>
+                    <div class="faq-item">
+                        <p class="faq-q">
+                            ¿Mis datos se guardan en algún servidor?
+                        </p>
+                        <p class="faq-a">
+                            No. Todo funciona en tu navegador. La lista de
+                            postales y la tasa se guardan solo en el
+                            localStorage de tu dispositivo.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="disclaimer-box">
+                <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <p>
+                    Mi Postal es un proyecto independiente sin afiliación con
+                    FIFA, Panini Group ni ninguna entidad oficial. Los precios
+                    son estimaciones con fines recreativos.
+                </p>
             </div>
-            <div class="formula-calc">€180M ÷ €10M × ₡100 = <strong class="formula-result">₡1,800</strong></div>
-          </div>
-          <div class="formula-example">
-            <div class="formula-player">
-              <span class="fi fi-no"></span>
-              <strong>Erling Haaland</strong>
+
+            <div class="cta-wrap">
+                <a href="index.html" class="btn-cta btn-cta-primary">
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    Ir a buscar jugadores
+                </a>
+                <a href="about.html" class="btn-cta btn-cta-ghost"
+                    >Acerca del proyecto</a
+                >
             </div>
-            <div class="formula-calc">€200M ÷ €10M × ₡100 = <strong class="formula-result">₡2,000</strong></div>
-          </div>
-          <div class="formula-example">
-            <div class="formula-player">
-              <span class="fi fi-es"></span>
-              <strong>Lamine Yamal</strong>
-            </div>
-            <div class="formula-calc">€120M ÷ €10M × ₡100 = <strong class="formula-result">₡1,200</strong></div>
-          </div>
-          <div class="formula-example">
-            <div class="formula-player">
-              <span class="fi fi-qa"></span>
-              <strong>Jugador pequeño</strong>
-            </div>
-            <div class="formula-calc">cualquier valor &lt; €10M = mínimo <strong class="formula-result">₡100</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+        </main>
 
-    <section class="content-section">
-      <p class="section-label">Preguntas frecuentes</p>
-      <h2 class="section-title">FAQ</h2>
-
-      <div class="faq-list">
-        <div class="faq-item">
-          <p class="faq-q">¿Por qué no encuentro a algún jugador?</p>
-          <p class="faq-a">El catálogo incluye los jugadores con mayor valor de mercado de cada selección clasificada al
-            Mundial 2026. Jugadores con valor de mercado cero o sin registro en Transfermarkt no aparecen.</p>
-        </div>
-        <div class="faq-item">
-          <p class="faq-q">¿Los datos son en tiempo real?</p>
-          <p class="faq-a">El dataset se actualiza semanalmente desde Transfermarkt. El archivo que descarga la app
-            puede tener hasta una semana de retraso.</p>
-        </div>
-        <div class="faq-item">
-          <p class="faq-q">¿Funciona sin internet después de cargar?</p>
-          <p class="faq-a">Sí. Una vez que el catálogo cargó, la búsqueda y todos los cálculos funcionan sin conexión.
-            Solo la carga inicial requiere internet.</p>
-        </div>
-        <div class="faq-item">
-          <p class="faq-q">¿Mis datos se guardan en algún servidor?</p>
-          <p class="faq-a">No. Todo funciona en tu navegador. La lista de postales y la tasa se guardan solo en el
-            localStorage de tu dispositivo.</p>
-        </div>
-      </div>
-    </section>
-
-    <div class="disclaimer-box">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-      </svg>
-      <p>Panini Valor es un proyecto independiente sin afiliación con FIFA, Panini Group ni ninguna entidad oficial. Los
-        precios son estimaciones con fines recreativos.</p>
-    </div>
-
-    <div class="cta-wrap">
-      <a href="index.html" class="btn-cta btn-cta-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
-        Ir a buscar jugadores
-      </a>
-      <a href="about.html" class="btn-cta btn-cta-ghost">Acerca del proyecto</a>
-    </div>
-
-  </main>
-
-  <footer class="page-footer">
-    <p>Panini Valor · Proyecto independiente · No afiliado con FIFA ni Panini Group · <a
-        href="https://github.com/jess-devs/panini-valor" style="color:#4a5d8a" target="_blank">GitHub</a></p>
-  </footer>
-
-</body>
-
+        <footer class="page-footer">
+            <p>
+                Mi Postal · Proyecto independiente · No afiliado con FIFA ni
+                Panini Group ·
+                <a
+                    href="https://github.com/jess-devs/panini-valor"
+                    style="color: #4a5d8a"
+                    target="_blank"
+                    >GitHub</a
+                >
+            </p>
+        </footer>
+    </body>
 </html>
