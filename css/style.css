@@ -1322,9 +1322,10 @@ main {
     line-height: 1;
 }
 
-/* ── Estimador de precio para jugadores sin valor de mercado ── */
+/* ── Estimador / editor de valor de mercado ── */
 
-.est-cell {
+.est-cell,
+.edit-cell {
     text-align: right;
     vertical-align: middle;
 }
@@ -1357,7 +1358,8 @@ main {
     pointer-events: none;
 }
 
-.est-input {
+.est-input,
+.edit-eur-input {
     width: 52px;
     border: none;
     background: transparent;
@@ -1372,16 +1374,20 @@ main {
 }
 
 .est-input::-webkit-outer-spin-button,
-.est-input::-webkit-inner-spin-button {
+.est-input::-webkit-inner-spin-button,
+.edit-eur-input::-webkit-outer-spin-button,
+.edit-eur-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
-.est-input::placeholder {
+.est-input::placeholder,
+.edit-eur-input::placeholder {
     color: var(--text-light);
     font-weight: 400;
 }
 
+/* Precio estimado (jugador sin precio) */
 .est-price-cell {
     text-align: right;
     font-size: 0.95rem;
@@ -1395,4 +1401,82 @@ main {
     color: var(--text-light) !important;
     font-weight: 500 !important;
     font-style: italic;
+}
+
+/* Celda de precio para jugadores con precio (contiene span + botón mobile) */
+.edit-crc-cell {
+    text-align: right;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.crc-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.crc-edited {
+    color: var(--navy) !important;
+}
+
+/* Botón lápiz en EUR cell (desktop) */
+.eur-display {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.eur-edit-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 2px 3px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    transition: opacity 0.15s, color 0.15s, background 0.12s;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.edit-cell:hover .eur-edit-btn {
+    opacity: 1;
+}
+
+.eur-edit-btn:hover {
+    color: var(--navy);
+    background: var(--surface-2);
+}
+
+.eur-text {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.eur-edited {
+    color: var(--navy) !important;
+    font-weight: 700 !important;
+}
+
+/* Input edit oculto por defecto, visible en modo edición */
+.price-row .eur-edit {
+    display: none;
+}
+
+.price-row--editing .eur-display {
+    display: none;
+}
+
+.price-row--editing .eur-edit {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Botón lápiz dentro del precio (solo mobile) */
+.eur-edit-mobile-btn {
+    display: none;
 }

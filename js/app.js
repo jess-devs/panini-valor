@@ -15,13 +15,13 @@ import {
 } from "./converter.js";
 import { openDialog, closeDialog } from "./transitions.js";
 
-/** @type {{ plus: string, check: string, x: string, user: string, userSm: string }} */
 const ICON = {
   plus: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
   check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
   x: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
   user: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   userSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  pencil: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
 };
 
 /** @type {object[]} */
@@ -35,8 +35,15 @@ const CART_KEY = "panini_cart";
 /** @type {object[]} */
 let cart = [];
 
-/** Valores estimados temporales por player_id (en EUR, solo en memoria). */
 const estimatedValues = new Map();
+const editedValues = new Map();
+const editingIds = new Set();
+
+function clearPlayerState(id) {
+  estimatedValues.delete(id);
+  editedValues.delete(id);
+  editingIds.delete(id);
+}
 
 /**
  * Devuelve los IDs del carrito como strings.
@@ -103,7 +110,7 @@ function removeFromCart(playerId) {
     row.classList.add("cart-row-out");
     setTimeout(() => {
       cart = cart.filter((p) => String(p.player_id) !== id);
-      estimatedValues.delete(id);
+      clearPlayerState(id);
       saveCart();
       renderCart();
       const btn = document.querySelector(`[data-add-id="${id}"]`);
@@ -111,7 +118,7 @@ function removeFromCart(playerId) {
     }, 220);
   } else {
     cart = cart.filter((p) => String(p.player_id) !== id);
-    estimatedValues.delete(id);
+    clearPlayerState(id);
     saveCart();
     renderCart();
     const btn = document.querySelector(`[data-add-id="${id}"]`);
@@ -318,9 +325,16 @@ function renderCart() {
     .map((p) => {
       const id = String(p.player_id);
       const hasPrice = !!p.market_value_in_eur;
+
       const estRaw = estimatedValues.get(id);
       const estMillions = estRaw !== undefined ? parseFloat((estRaw / 1_000_000).toFixed(3)) : "";
-      const eurForCalc = hasPrice ? p.market_value_in_eur : (estRaw || null);
+
+      const editedRaw = editedValues.get(id);
+      const editMillions = editedRaw !== undefined ? parseFloat((editedRaw / 1_000_000).toFixed(3)) : "";
+      const origMillions = hasPrice ? parseFloat((p.market_value_in_eur / 1_000_000).toFixed(3)) : 0;
+      const isEditing = editingIds.has(id);
+
+      const eurForCalc = hasPrice ? (editedRaw || p.market_value_in_eur) : (estRaw || null);
       const price = calcPrice(eurForCalc, currentRate);
       subtotal += price;
 
@@ -338,22 +352,49 @@ function renderCart() {
         ? `<div class="cart-flag-dot"><span class="fi fi-${iso}"></span></div>`
         : "";
 
-      const priceCells = hasPrice
-        ? `<td class="cell-eur">${formatEUR(p.market_value_in_eur)}</td><td class="cell-crc">${formatCRC(price)}</td>`
-        : `<td class="cell-eur est-cell">
+      let priceCells;
+      if (hasPrice) {
+        const displayEUR = editedRaw || p.market_value_in_eur;
+        priceCells = `
+          <td class="cell-eur edit-cell">
+            <div class="eur-display">
+              <span class="eur-text${editedRaw ? " eur-edited" : ""}">${formatEUR(displayEUR)}</span>
+              <button class="eur-edit-btn" data-edit-id="${id}" title="Editar valor de mercado" aria-label="Editar valor">${ICON.pencil}</button>
+            </div>
+            <div class="eur-edit est-input-wrap">
+              <span class="est-prefix">€</span>
+              <input type="number" class="edit-eur-input" data-edit-eur-id="${id}"
+                min="0" step="any" placeholder="${origMillions}"
+                value="${editMillions}"
+                aria-label="Valor de mercado en millones de euros">
+              <span class="est-suffix">M</span>
+            </div>
+          </td>
+          <td class="cell-crc edit-crc-cell">
+            <button class="eur-edit-mobile-btn" data-edit-id="${id}" aria-label="Editar valor de mercado">${ICON.pencil}</button>
+            <span class="crc-value${editedRaw ? " crc-edited" : ""}" data-crc-id="${id}">${formatCRC(price)}</span>
+          </td>`;
+      } else {
+        priceCells = `
+          <td class="cell-eur est-cell">
             <div class="est-input-wrap" title="Ingresá el valor estimado en millones de euros">
               <span class="est-prefix">€</span>
-              <input type="number" class="est-input" data-est-id="${p.player_id}"
+              <input type="number" class="est-input" data-est-id="${id}"
                 placeholder="0" min="0" step="any" value="${estMillions}"
                 aria-label="Precio estimado en millones de euros para ${p.name}">
               <span class="est-suffix">M</span>
             </div>
           </td>
-          <td class="cell-crc est-price-cell${estRaw ? "" : " est-price-pending"}" data-est-price-id="${p.player_id}">
+          <td class="cell-crc est-price-cell${estRaw ? "" : " est-price-pending"}" data-est-price-id="${id}">
             ${formatCRC(price)}
           </td>`;
+      }
 
-      return `<tr${hasPrice ? "" : ' class="no-price-row"'}>
+      const trClass = hasPrice
+        ? `price-row${isEditing ? " price-row--editing" : ""}`
+        : "no-price-row";
+
+      return `<tr class="${trClass}"${hasPrice ? ` data-price-row="${id}"` : ""}>
       <td><div class="cart-player-cell">
         <div class="cart-avatar-wrap">${av}${avPh}${dot}</div>
         <span class="cart-player-name">${p.name}</span>
@@ -370,44 +411,87 @@ function renderCart() {
 }
 
 $cartBody.addEventListener("click", (e) => {
-  const btn = e.target.closest("[data-del-id]");
-  if (btn) removeFromCart(btn.dataset.delId);
+  const delBtn = e.target.closest("[data-del-id]");
+  if (delBtn) { removeFromCart(delBtn.dataset.delId); return; }
+
+  const editBtn = e.target.closest("[data-edit-id]");
+  if (editBtn) {
+    const id = editBtn.dataset.editId;
+    const row = $cartBody.querySelector(`[data-price-row="${id}"]`);
+    if (!row) return;
+    if (editingIds.has(id)) {
+      editingIds.delete(id);
+      row.classList.remove("price-row--editing");
+    } else {
+      editingIds.add(id);
+      row.classList.add("price-row--editing");
+      setTimeout(() => row.querySelector(`[data-edit-eur-id="${id}"]`)?.focus(), 0);
+    }
+  }
 });
 
-$cartBody.addEventListener("input", (e) => {
-  const input = e.target.closest(".est-input");
-  if (!input) return;
-
-  const id = input.dataset.estId;
-  const millions = parseFloat(input.value);
-
-  if (isNaN(millions) || millions <= 0) {
-    estimatedValues.delete(id);
-  } else {
-    estimatedValues.set(id, millions * 1_000_000);
-  }
-
-  const estRaw = estimatedValues.get(id);
-  const price = calcPrice(estRaw || null, currentRate);
-
-  const priceCell = $cartBody.querySelector(`[data-est-price-id="${id}"]`);
-  if (priceCell) {
-    priceCell.textContent = formatCRC(price);
-    priceCell.classList.toggle("est-price-pending", !estRaw);
-  }
-
+function recalcSubtotal() {
   let subtotal = 0;
   cart.forEach((p) => {
     const pid = String(p.player_id);
     const est = estimatedValues.get(pid);
-    subtotal += calcPrice(p.market_value_in_eur || est || null, currentRate);
+    const edited = editedValues.get(pid);
+    const eur = p.market_value_in_eur ? (edited || p.market_value_in_eur) : (est || null);
+    subtotal += calcPrice(eur, currentRate);
   });
   $cartTotal.textContent = formatCRC(subtotal);
+}
+
+$cartBody.addEventListener("input", (e) => {
+  const estInput = e.target.closest(".est-input");
+  if (estInput) {
+    const id = estInput.dataset.estId;
+    const millions = parseFloat(estInput.value);
+    if (isNaN(millions) || millions <= 0) estimatedValues.delete(id);
+    else estimatedValues.set(id, millions * 1_000_000);
+
+    const estRaw = estimatedValues.get(id);
+    const price = calcPrice(estRaw || null, currentRate);
+    const priceCell = $cartBody.querySelector(`[data-est-price-id="${id}"]`);
+    if (priceCell) {
+      priceCell.textContent = formatCRC(price);
+      priceCell.classList.toggle("est-price-pending", !estRaw);
+    }
+    recalcSubtotal();
+    return;
+  }
+
+  const editInput = e.target.closest(".edit-eur-input");
+  if (!editInput) return;
+  const id = editInput.dataset.editEurId;
+  const millions = parseFloat(editInput.value);
+  if (isNaN(millions) || millions <= 0) editedValues.delete(id);
+  else editedValues.set(id, millions * 1_000_000);
+
+  const editedRaw = editedValues.get(id);
+  const player = cart.find((p) => String(p.player_id) === id);
+  if (!player) return;
+  const displayEUR = editedRaw || player.market_value_in_eur;
+  const price = calcPrice(displayEUR, currentRate);
+
+  const crcEl = $cartBody.querySelector(`[data-crc-id="${id}"]`);
+  if (crcEl) {
+    crcEl.textContent = formatCRC(price);
+    crcEl.classList.toggle("crc-edited", !!editedRaw);
+  }
+  const eurText = $cartBody.querySelector(`[data-price-row="${id}"] .eur-text`);
+  if (eurText) {
+    eurText.textContent = formatEUR(displayEUR);
+    eurText.classList.toggle("eur-edited", !!editedRaw);
+  }
+  recalcSubtotal();
 });
 
 $clearCart.addEventListener("click", () => {
   cart = [];
   estimatedValues.clear();
+  editedValues.clear();
+  editingIds.clear();
   saveCart();
   renderCart();
   document.querySelectorAll(".add-btn--added").forEach(setNotAdded);
