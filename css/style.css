@@ -464,6 +464,15 @@ main {
   white-space: nowrap;
 }
 
+.no-price a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.no-price a:hover {
+  text-decoration: underline;
+}
+
 .add-btn {
     flex-shrink: 0;
     width: 36px;

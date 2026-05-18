@@ -259,7 +259,7 @@ function cardHTML(p, added) {
       <div class="card-pricing">
         ${hasPrice
           ? `<span class="player-eur">${formatEUR(p.market_value_in_eur)}</span><span class="player-crc">${formatCRC(price)}</span>`
-          : `<span class="no-price">Precio no disponible</span>`}
+          : `<span class="no-price"><a href="https://www.transfermarkt.es/" target="_blank" rel="noopener noreferrer">Precio no disponible</a></span>`}
       </div>
     </div>
     <button class="add-btn${added ? " add-btn--added" : ""}" data-add-id="${p.player_id}"
@@ -337,7 +337,7 @@ function renderCart() {
       <td><span class="cart-pos-badge">${pos}</span></td>
       ${hasPrice
         ? `<td class="cell-eur">${formatEUR(p.market_value_in_eur)}</td><td class="cell-crc">${formatCRC(price)}</td>`
-        : `<td class="cell-eur" colspan="2"><span class="no-price">Precio no disponible</span></td>`}
+        : `<td class="cell-eur" colspan="2"><span class="no-price"><a href="https://www.transfermarkt.es/" target="_blank" rel="noopener noreferrer">Precio no disponible</a></span></td>`}
       <td><button class="del-btn" data-del-id="${p.player_id}" aria-label="Eliminar ${p.name}">${ICON.x}</button></td>
     </tr>`;
     })
