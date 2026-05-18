@@ -1,64 +1,17 @@
 export const CSV_URL = "data/players.csv.gz";
 
 /**
- * Países clasificados al Mundial 2026, tal como aparecen
- * en el campo country_of_citizenship del dataset de Transfermarkt.
- * @type {Set<string>}
+ * Normaliza el nombre de un país usando el mapa de alias.
+ * @param {string} country
+ * @returns {string}
  */
-const WC2026_COUNTRIES = new Set([
-  "Argentina",
-  "Brazil",
-  "Colombia",
-  "Uruguay",
-  "Ecuador",
-  "Paraguay",
-  "Spain",
-  "France",
-  "Germany",
-  "Portugal",
-  "Netherlands",
-  "Belgium",
-  "Croatia",
-  "Switzerland",
-  "Norway",
-  "Scotland",
-  "Austria",
-  "England",
-  "Bosnia-Herzegovina",
-  "Sweden",
-  "Turkey",
-  "Czech Republic",
-  "United States",
-  "Mexico",
-  "Canada",
-  "Haiti",
-  "Panama",
-  "Curacao",
-  "Morocco",
-  "Egypt",
-  "Algeria",
-  "Ghana",
-  "Cote d'Ivoire",
-  "Tunisia",
-  "Senegal",
-  "South Africa",
-  "DR Congo",
-  "Cape Verde",
-  "Japan",
-  "Korea, South",
-  "Australia",
-  "Iran",
-  "Saudi Arabia",
-  "Qatar",
-  "Uzbekistan",
-  "Jordan",
-  "Iraq",
-  "New Zealand",
-]);
+function normalizeCountryName(country) {
+  const trimmed = (country || "").trim();
+  return COUNTRY_ALIASES[trimmed] || trimmed;
+}
 
 /**
- * Mapa de alias: variantes de nombres de país del CSV
- * hacia el nombre canónico usado en WC2026_COUNTRIES.
+ * Mapa de alias: variantes de nombres de país hacia el nombre canónico.
  * @type {Record<string, string>}
  */
 const COUNTRY_ALIASES = {
@@ -74,16 +27,6 @@ const COUNTRY_ALIASES = {
 };
 
 /**
- * Normaliza el nombre de un país usando el mapa de alias.
- * @param {string} country
- * @returns {string}
- */
-function normalizeCountryName(country) {
-  const trimmed = (country || "").trim();
-  return COUNTRY_ALIASES[trimmed] || trimmed;
-}
-
-/**
  * Nombres localizados al español para países con nombres especiales en el dataset.
  * @type {Record<string, string>}
  */
@@ -93,6 +36,11 @@ export const COUNTRY_DISPLAY = {
   "DR Congo": "R.D. Congo",
   "Bosnia-Herzegovina": "Bosnia y Herzegovina",
   "Czech Republic": "Chequia",
+  "United States": "Estados Unidos",
+  "Saudi Arabia": "Arabia Saudita",
+  "New Zealand": "Nueva Zelanda",
+  "South Africa": "Sudáfrica",
+  "Cape Verde": "Cabo Verde",
 };
 
 /**
@@ -100,54 +48,184 @@ export const COUNTRY_DISPLAY = {
  * @type {Record<string, string>}
  */
 const ISO_CODES = {
-  Argentina: "ar",
-  Brazil: "br",
-  Colombia: "co",
-  Uruguay: "uy",
-  Ecuador: "ec",
-  Paraguay: "py",
-  Spain: "es",
-  France: "fr",
-  Germany: "de",
-  Portugal: "pt",
-  Netherlands: "nl",
-  Belgium: "be",
-  Croatia: "hr",
-  Switzerland: "ch",
-  Norway: "no",
-  Scotland: "gb-sct",
-  Austria: "at",
-  England: "gb-eng",
-  "Bosnia-Herzegovina": "ba",
-  Sweden: "se",
-  Turkey: "tr",
-  "Czech Republic": "cz",
-  "United States": "us",
-  Mexico: "mx",
-  Canada: "ca",
-  Haiti: "ht",
-  Panama: "pa",
-  Curacao: "cw",
-  Morocco: "ma",
-  Egypt: "eg",
+  Afghanistan: "af",
+  Albania: "al",
   Algeria: "dz",
-  Ghana: "gh",
-  "Cote d'Ivoire": "ci",
-  Tunisia: "tn",
-  Senegal: "sn",
-  "South Africa": "za",
-  "DR Congo": "cd",
-  "Cape Verde": "cv",
-  Japan: "jp",
-  "Korea, South": "kr",
+  "American Samoa": "as",
+  Andorra: "ad",
+  Angola: "ao",
+  Argentina: "ar",
+  Armenia: "am",
   Australia: "au",
+  Austria: "at",
+  Azerbaijan: "az",
+  Bahrain: "bh",
+  Bangladesh: "bd",
+  Belarus: "by",
+  Belgium: "be",
+  Belize: "bz",
+  Benin: "bj",
+  Bhutan: "bt",
+  Bolivia: "bo",
+  "Bosnia-Herzegovina": "ba",
+  Botswana: "bw",
+  Brazil: "br",
+  Bulgaria: "bg",
+  Burkina: "bf",
+  "Burkina Faso": "bf",
+  Burundi: "bi",
+  Cambodia: "kh",
+  Cameroon: "cm",
+  Canada: "ca",
+  "Cape Verde": "cv",
+  "Central African Republic": "cf",
+  Chad: "td",
+  Chile: "cl",
+  China: "cn",
+  Colombia: "co",
+  Comoros: "km",
+  "Congo DR": "cd",
+  "DR Congo": "cd",
+  "Congo, DR": "cd",
+  "Republic of Congo": "cg",
+  "Costa Rica": "cr",
+  Croatia: "hr",
+  Cuba: "cu",
+  Curacao: "cw",
+  Cyprus: "cy",
+  "Czech Republic": "cz",
+  Denmark: "dk",
+  Djibouti: "dj",
+  "Dominican Republic": "do",
+  Ecuador: "ec",
+  Egypt: "eg",
+  "El Salvador": "sv",
+  England: "gb-eng",
+  "Equatorial Guinea": "gq",
+  Eritrea: "er",
+  Estonia: "ee",
+  Eswatini: "sz",
+  Ethiopia: "et",
+  "Faroe Islands": "fo",
+  Fiji: "fj",
+  Finland: "fi",
+  France: "fr",
+  Gabon: "ga",
+  Gambia: "gm",
+  Georgia: "ge",
+  Germany: "de",
+  Ghana: "gh",
+  Gibraltar: "gi",
+  Greece: "gr",
+  Guatemala: "gt",
+  Guinea: "gn",
+  "Guinea-Bissau": "gw",
+  Guyana: "gy",
+  Haiti: "ht",
+  Honduras: "hn",
+  Hungary: "hu",
+  Iceland: "is",
+  India: "in",
+  Indonesia: "id",
   Iran: "ir",
-  "Saudi Arabia": "sa",
-  Qatar: "qa",
-  Uzbekistan: "uz",
-  Jordan: "jo",
   Iraq: "iq",
+  Ireland: "ie",
+  Israel: "il",
+  Italy: "it",
+  Jamaica: "jm",
+  Japan: "jp",
+  Jordan: "jo",
+  Kazakhstan: "kz",
+  Kenya: "ke",
+  Kosovo: "xk",
+  Kuwait: "kw",
+  Kyrgyzstan: "kg",
+  Laos: "la",
+  Latvia: "lv",
+  Lebanon: "lb",
+  Lesotho: "ls",
+  Liberia: "lr",
+  Libya: "ly",
+  Liechtenstein: "li",
+  Lithuania: "lt",
+  Luxembourg: "lu",
+  Madagascar: "mg",
+  Malawi: "mw",
+  Malaysia: "my",
+  Maldives: "mv",
+  Mali: "ml",
+  Malta: "mt",
+  Mauritania: "mr",
+  Mauritius: "mu",
+  Mexico: "mx",
+  Moldova: "md",
+  Mongolia: "mn",
+  Montenegro: "me",
+  Morocco: "ma",
+  Mozambique: "mz",
+  Myanmar: "mm",
+  Namibia: "na",
+  Nepal: "np",
+  Netherlands: "nl",
   "New Zealand": "nz",
+  Nicaragua: "ni",
+  Niger: "ne",
+  Nigeria: "ng",
+  "North Macedonia": "mk",
+  "Northern Ireland": "gb-nir",
+  Norway: "no",
+  Oman: "om",
+  Pakistan: "pk",
+  Panama: "pa",
+  Paraguay: "py",
+  Peru: "pe",
+  Philippines: "ph",
+  Poland: "pl",
+  Portugal: "pt",
+  Qatar: "qa",
+  Romania: "ro",
+  Russia: "ru",
+  Rwanda: "rw",
+  "Saudi Arabia": "sa",
+  Scotland: "gb-sct",
+  Senegal: "sn",
+  Serbia: "rs",
+  "Sierra Leone": "sl",
+  Slovakia: "sk",
+  Slovenia: "si",
+  Somalia: "so",
+  "South Africa": "za",
+  "South Sudan": "ss",
+  Spain: "es",
+  "Sri Lanka": "lk",
+  Sudan: "sd",
+  Suriname: "sr",
+  Sweden: "se",
+  Switzerland: "ch",
+  Syria: "sy",
+  Taiwan: "tw",
+  Tajikistan: "tj",
+  Tanzania: "tz",
+  Thailand: "th",
+  Togo: "tg",
+  "Trinidad and Tobago": "tt",
+  Tunisia: "tn",
+  Turkey: "tr",
+  Turkmenistan: "tm",
+  Uganda: "ug",
+  Ukraine: "ua",
+  "United Arab Emirates": "ae",
+  "United States": "us",
+  Uruguay: "uy",
+  Uzbekistan: "uz",
+  Venezuela: "ve",
+  Vietnam: "vn",
+  Wales: "gb-wls",
+  Yemen: "ye",
+  Zambia: "zm",
+  Zimbabwe: "zw",
+  "Korea, South": "kr",
+  "Cote d'Ivoire": "ci",
 };
 
 /**
@@ -187,7 +265,7 @@ export function getPositionES(position) {
 
 /**
  * Descarga y descomprime el CSV de jugadores, lo parsea con PapaParse
- * y filtra solo los clasificados al Mundial 2026 con valor de mercado > 0.
+ * y devuelve todos los jugadores sin filtro de país.
  * @param {(pct: number) => void} onProgress - Callback con progreso 0–1.
  * @returns {Promise<object[]>}
  */
@@ -231,48 +309,11 @@ export async function downloadAndParse(onProgress) {
       dynamicTyping: true,
       skipEmptyLines: true,
       complete({ data }) {
-        resolve(filterWC2026(data));
+        resolve(data.filter((row) => row.player_id && row.name));
       },
       error(err) {
         reject(new Error("Error al procesar los datos: " + err.message));
       },
     });
   });
-}
-
-/**
- * Filtra las filas del CSV: solo jugadores de selecciones clasificadas
- * al Mundial 2026 (con normalización de nombres de país).
- * @param {object[]} rows
- * @returns {object[]}
- */
-function filterWC2026(rows) {
-  const uniqueCountries = new Set();
-  const unmatched = new Set();
-
-  const filtered = rows.filter((row) => {
-    const raw = (row.country_of_citizenship || "").trim();
-    const country = normalizeCountryName(raw);
-    uniqueCountries.add(raw);
-    if (!WC2026_COUNTRIES.has(country)) {
-      unmatched.add(raw);
-      return false;
-    }
-    return true;
-  });
-
-  const zeroValue = filtered.filter((row) => {
-    const v = row.market_value_in_eur;
-    return v === 0 || v === null || v === undefined || v === "";
-  });
-
-  console.log("--- DEBUG filterWC2026 ---");
-  console.log("Total filas en CSV:", rows.length);
-  console.log("Países únicos encontrados:", [...uniqueCountries].sort());
-  console.log("Países que NO hacen match:", [...unmatched].sort());
-  console.log("Jugadores que pasan el filtro de país:", filtered.length);
-  console.log("Jugadores descartados por país:", rows.length - filtered.length);
-  console.log("Jugadores con valor de mercado 0/null/empty:", zeroValue.length);
-
-  return filtered;
 }
