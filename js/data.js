@@ -57,6 +57,33 @@ const WC2026_COUNTRIES = new Set([
 ]);
 
 /**
+ * Mapa de alias: variantes de nombres de país del CSV
+ * hacia el nombre canónico usado en WC2026_COUNTRIES.
+ * @type {Record<string, string>}
+ */
+const COUNTRY_ALIASES = {
+  "South Korea": "Korea, South",
+  "Korea Republic": "Korea, South",
+  Korea: "Korea, South",
+  "Ivory Coast": "Cote d'Ivoire",
+  "Congo DR": "DR Congo",
+  "Democratic Republic of Congo": "DR Congo",
+  "Bosnia and Herzegovina": "Bosnia-Herzegovina",
+  "Bosnia & Herzegovina": "Bosnia-Herzegovina",
+  "Cabo Verde": "Cape Verde",
+};
+
+/**
+ * Normaliza el nombre de un país usando el mapa de alias.
+ * @param {string} country
+ * @returns {string}
+ */
+function normalizeCountryName(country) {
+  const trimmed = (country || "").trim();
+  return COUNTRY_ALIASES[trimmed] || trimmed;
+}
+
+/**
  * Nombres localizados al español para países con nombres especiales en el dataset.
  * @type {Record<string, string>}
  */
@@ -129,7 +156,7 @@ const ISO_CODES = {
  * @returns {string}
  */
 export function getISO(country) {
-  return ISO_CODES[country] || "";
+  return ISO_CODES[normalizeCountryName(country)] || "";
 }
 
 /**
@@ -138,7 +165,7 @@ export function getISO(country) {
  * @returns {string}
  */
 export function getCountryDisplay(country) {
-  return COUNTRY_DISPLAY[country] || country;
+  return COUNTRY_DISPLAY[normalizeCountryName(country)] || normalizeCountryName(country);
 }
 
 /** @type {Record<string, string>} */
@@ -215,14 +242,37 @@ export async function downloadAndParse(onProgress) {
 
 /**
  * Filtra las filas del CSV: solo jugadores de selecciones clasificadas
- * al Mundial 2026 con valor de mercado mayor a cero.
+ * al Mundial 2026 (con normalización de nombres de país).
  * @param {object[]} rows
  * @returns {object[]}
  */
 function filterWC2026(rows) {
-  return rows.filter((row) => {
-    const country = (row.country_of_citizenship || "").trim();
-    const value = row.market_value_in_eur;
-    return WC2026_COUNTRIES.has(country) && value && value > 0;
+  const uniqueCountries = new Set();
+  const unmatched = new Set();
+
+  const filtered = rows.filter((row) => {
+    const raw = (row.country_of_citizenship || "").trim();
+    const country = normalizeCountryName(raw);
+    uniqueCountries.add(raw);
+    if (!WC2026_COUNTRIES.has(country)) {
+      unmatched.add(raw);
+      return false;
+    }
+    return true;
   });
+
+  const zeroValue = filtered.filter((row) => {
+    const v = row.market_value_in_eur;
+    return v === 0 || v === null || v === undefined || v === "";
+  });
+
+  console.log("--- DEBUG filterWC2026 ---");
+  console.log("Total filas en CSV:", rows.length);
+  console.log("Países únicos encontrados:", [...uniqueCountries].sort());
+  console.log("Países que NO hacen match:", [...unmatched].sort());
+  console.log("Jugadores que pasan el filtro de país:", filtered.length);
+  console.log("Jugadores descartados por país:", rows.length - filtered.length);
+  console.log("Jugadores con valor de mercado 0/null/empty:", zeroValue.length);
+
+  return filtered;
 }

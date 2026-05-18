@@ -449,11 +449,19 @@ main {
 }
 
 .player-crc {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: var(--gold);
-    letter-spacing: -0.02em;
-    line-height: 1.1;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.no-price {
+  font-size: 0.72rem;
+  color: var(--text-light);
+  font-weight: 500;
+  font-style: italic;
+  white-space: nowrap;
 }
 
 .add-btn {

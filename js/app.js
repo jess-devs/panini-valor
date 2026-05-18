@@ -236,6 +236,7 @@ function cardHTML(p, added) {
   const pos = getPositionES(p.position);
   const iso = getISO(p.country_of_citizenship);
   const imgSrc = p.image_url || "";
+  const hasPrice = !!p.market_value_in_eur;
 
   const photo = imgSrc
     ? `<img src="${imgSrc}" alt="${p.name}" class="player-img" loading="lazy"
@@ -256,8 +257,9 @@ function cardHTML(p, added) {
         <span class="player-pos-badge">${pos}</span>
       </div>
       <div class="card-pricing">
-        <span class="player-eur">${formatEUR(p.market_value_in_eur)}</span>
-        <span class="player-crc">${formatCRC(price)}</span>
+        ${hasPrice
+          ? `<span class="player-eur">${formatEUR(p.market_value_in_eur)}</span><span class="player-crc">${formatCRC(price)}</span>`
+          : `<span class="no-price">Precio no disponible</span>`}
       </div>
     </div>
     <button class="add-btn${added ? " add-btn--added" : ""}" data-add-id="${p.player_id}"
@@ -315,6 +317,7 @@ function renderCart() {
       const pos = getPositionES(p.position);
       const iso = getISO(p.country_of_citizenship);
       const imgSrc = p.image_url || "";
+      const hasPrice = !!p.market_value_in_eur;
 
       const av = imgSrc
         ? `<img src="${imgSrc}" alt="${p.name}" class="cart-avatar" loading="lazy"
@@ -332,8 +335,9 @@ function renderCart() {
       </div></td>
       <td class="cart-country-cell">${iso ? `<span class="fi fi-${iso}"></span>` : ""}${country}</td>
       <td><span class="cart-pos-badge">${pos}</span></td>
-      <td class="cell-eur">${formatEUR(p.market_value_in_eur)}</td>
-      <td class="cell-crc">${formatCRC(price)}</td>
+      ${hasPrice
+        ? `<td class="cell-eur">${formatEUR(p.market_value_in_eur)}</td><td class="cell-crc">${formatCRC(price)}</td>`
+        : `<td class="cell-eur" colspan="2"><span class="no-price">Precio no disponible</span></td>`}
       <td><button class="del-btn" data-del-id="${p.player_id}" aria-label="Eliminar ${p.name}">${ICON.x}</button></td>
     </tr>`;
     })
