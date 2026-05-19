@@ -1,3 +1,5 @@
+import { normalize } from "./search.js";
+
 /** @type {Record<string, string>} Código de equipo → country_of_citizenship del CSV */
 export const TEAM_COUNTRY = {
   MEX: "Mexico", RSA: "South Africa", KOR: "Korea, South", CZE: "Czech Republic",
@@ -1014,32 +1016,18 @@ export const CHECKLIST = {
 };
 
 /**
- * Normaliza un string: minúsculas y sin diacríticos.
- * @param {string} str
- * @returns {string}
- */
-function normalize(str) {
-  if (!str) return "";
-  return str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-}
-
-/**
- * Retorna un Map de nombre normalizado → código de estampa,
- * para el grupo/equipo activo.
+ * Retorna un Map de nombre normalizado → { code, team },
+ * para el grupo/equipo activo (o todos si ambos son null).
  * @param {string|null} group
  * @param {string|null} teamCode
- * @returns {Map<string, string>}
+ * @returns {Map<string, { code: string, team: string }>}
  */
 export function buildChecklistMap(group, teamCode) {
   const map = new Map();
-  const teams = teamCode
-    ? [teamCode]
-    : group
-    ? GROUPS[group]
-    : Object.keys(CHECKLIST);
-  for (const code of teams) {
-    for (const p of CHECKLIST[code] || []) {
-      map.set(normalize(p.name), p.code);
+  const teams = teamCode ? [teamCode] : group ? GROUPS[group] : Object.keys(CHECKLIST);
+  for (const team of teams) {
+    for (const entry of CHECKLIST[team] || []) {
+      map.set(normalize(entry.name), { code: entry.code, team });
     }
   }
   return map;

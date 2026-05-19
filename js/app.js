@@ -4,7 +4,7 @@ import {
   getCountryDisplay,
   getPositionES,
 } from "./data.js";
-import { buildIndex, search } from "./search.js";
+import { buildIndex, search, normalize } from "./search.js";
 import {
   loadRate,
   saveRate,
@@ -14,7 +14,7 @@ import {
   DEFAULT_RATE,
 } from "./converter.js";
 import { openDialog, closeDialog } from "./transitions.js";
-import { GROUPS, TEAM_DISPLAY, getFilteredCountries, buildChecklistMap } from "./checklist.js";
+import { GROUPS, TEAM_DISPLAY, TEAM_COUNTRY, buildChecklistMap } from "./checklist.js";
 
 const ICON = {
   plus: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
@@ -38,6 +38,8 @@ let cart = [];
 
 let activeGroup = "";
 let activeTeam = "";
+let activePool = [];
+let activeIndex = [];
 
 const estimatedValues = new Map();
 const editedValues = new Map();
@@ -218,11 +220,13 @@ async function init() {
     });
     const globalCodeMap = buildChecklistMap(null, null);
     players = players.map((p) => {
-      const norm = (p.name || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-      const code = globalCodeMap.get(norm);
-      return code ? { ...p, sticker_code: code } : p;
+      const entry = globalCodeMap.get(normalize(p.name || ""));
+      const match = entry && TEAM_COUNTRY[entry.team] === p.country_of_citizenship;
+      return match ? { ...p, sticker_code: entry.code, sticker_team: entry.team } : p;
     });
     searchIndex = buildIndex(players);
+    activePool = players;
+    activeIndex = searchIndex;
     loadCart(players);
 
     $overlay.classList.add("hidden");
@@ -241,29 +245,27 @@ async function init() {
 
 function getFilteredPlayers() {
   if (!activeGroup && !activeTeam) return players;
-  const allowedTeams = new Set(
-    activeTeam ? [activeTeam] : (GROUPS[activeGroup] || []),
-  );
-  return players.filter((p) => {
-    const teamPrefix = p.sticker_code?.match(/^[A-Z]+/)?.[0] || "";
-    return p.sticker_code && allowedTeams.has(teamPrefix);
-  });
+  const allowedTeams = new Set(activeTeam ? [activeTeam] : (GROUPS[activeGroup] || []));
+  return players.filter((p) => p.sticker_team && allowedTeams.has(p.sticker_team));
+}
+
+function applyFilter() {
+  activePool = getFilteredPlayers();
+  activeIndex = activePool === players ? searchIndex : buildIndex(activePool);
 }
 
 function runQuery() {
   const query = $searchBox.value.trim();
-  const pool = getFilteredPlayers();
-  const hasFilter = activeGroup || activeTeam;
 
-  if (!hasFilter) {
+  if (!activeGroup && !activeTeam) {
     if (query.length < 2) { $results.innerHTML = ""; return; }
-    renderResults(search(query, buildIndex(pool), pool), query);
+    renderResults(search(query, activeIndex, activePool));
     return;
   }
 
   if (activeTeam) {
-    const found = query.length >= 2 ? search(query, buildIndex(pool), pool) : pool;
-    renderResults(found, query || " ");
+    const found = query.length >= 2 ? search(query, activeIndex, activePool) : activePool;
+    renderResults(found);
     return;
   }
 
@@ -272,7 +274,7 @@ function runQuery() {
     $results.innerHTML = `<p class="empty-msg">Escribí un nombre para buscar dentro del Grupo ${activeGroup}.</p>`;
     return;
   }
-  renderResults(search(query, buildIndex(pool), pool), query);
+  renderResults(search(query, activeIndex, activePool));
 }
 
 function updateTeamDropdown() {
@@ -298,24 +300,17 @@ $filterGroup.addEventListener("change", () => {
   activeGroup = $filterGroup.value;
   activeTeam = "";
   updateTeamDropdown();
+  applyFilter();
   runQuery();
 });
 
 $filterTeam.addEventListener("change", () => {
   activeTeam = $filterTeam.value;
+  applyFilter();
   runQuery();
 });
 
-/**
- * Renderiza las tarjetas de resultados de búsqueda.
- * @param {object[]} found
- * @param {string}   query
- */
-function renderResults(found, query) {
-  if (!activeGroup && !activeTeam && (!query || query.trim().length < 2)) {
-    $results.innerHTML = "";
-    return;
-  }
+function renderResults(found) {
   if (found.length === 0) {
     $results.innerHTML = `<p class="empty-msg">${
       activeTeam || activeGroup
@@ -355,9 +350,10 @@ function cardHTML(p, added) {
 
   return `
   <div class="card">
+    ${p.sticker_code ? `<span class="sticker-code">${p.sticker_code}</span>` : ""}
     <div class="player-photo-wrap">${photo}${ph}${dot}</div>
     <div class="card-body">
-      <p class="player-name">${p.name}${p.sticker_code ? `<span class="sticker-code">${p.sticker_code}</span>` : ""}</p>
+      <p class="player-name">${p.name}</p>
       <div class="player-meta">
         <span class="player-country">${country}</span>
         <span class="player-pos-badge">${pos}</span>
@@ -664,10 +660,7 @@ $saveBtn.addEventListener("click", () => {
   currentRate = { millones: m, colones: c };
   saveRate(currentRate);
   closeModal();
-  renderResults(
-    search($searchBox.value, searchIndex, players),
-    $searchBox.value,
-  );
+  runQuery();
   renderCart();
 });
 

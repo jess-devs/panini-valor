@@ -292,19 +292,21 @@ main {
 }
 
 .sticker-code {
-    display: inline-block;
-    margin-left: 7px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 0.62rem;
-    font-weight: 700;
+    position: absolute;
+    top: -1px;
+    right: 44px;
+    padding: 3px 8px;
+    border-radius: 0 0 6px 6px;
+    background: var(--navy);
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 800;
     font-family: monospace;
-    letter-spacing: 0.05em;
-    vertical-align: middle;
-    border: 1px solid #cbd5e1;
+    letter-spacing: 0.08em;
     white-space: nowrap;
+    border: 1px solid var(--navy);
+    border-top: none;
+    line-height: 1.4;
 }
 
 .search-icon {
@@ -368,6 +370,7 @@ main {
     align-items: center;
     gap: 14px;
     padding: 14px 12px 14px 14px;
+    position: relative;
     transition:
         box-shadow 0.2s,
         transform 0.2s;
