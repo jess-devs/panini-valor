@@ -1088,3 +1088,13 @@ export function getFilteredCountries(group, teamCode) {
   if (teamCode) return new Set([TEAM_COUNTRY[teamCode]]);
   return new Set(GROUPS[group].map((code) => TEAM_COUNTRY[code]));
 }
+
+/**
+ * Devuelve los jugadores del checklist que no tienen match en el CSV.
+ * @param {string} teamCode
+ * @param {Set<string>} matchedCodes - Códigos de estampa ya matcheados
+ * @returns {Array<{code: string, name: string, team: string}>}
+ */
+export function getMissingEntries(teamCode, matchedCodes) {
+  return (CHECKLIST[teamCode] || []).filter((e) => !matchedCodes.has(e.code));
+}

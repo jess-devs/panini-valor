@@ -555,6 +555,59 @@ main {
     background: #c8890e;
 }
 
+/* ── Tarjeta de jugador sin datos (missing) ── */
+.card--missing {
+    background: #fafbfd;
+    border: 1px dashed #d1d5db;
+    box-shadow: none;
+}
+
+.card--missing:hover {
+    box-shadow: 0 2px 8px rgba(14,27,61,0.04);
+    transform: none;
+}
+
+.player-placeholder--missing {
+    color: #d4a017;
+}
+
+.sticker-code--missing {
+    background: #6b7280;
+    border-color: #6b7280;
+}
+
+.missing-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 99px;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.missing-hint {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    font-weight: 400;
+    font-style: italic;
+    white-space: nowrap;
+}
+
+.add-btn--missing {
+    border-color: #e5e7eb !important;
+    background: #f9fafb !important;
+    color: #d1d5db !important;
+    cursor: not-allowed !important;
+}
+
+.add-btn--missing:hover {
+    border-color: #e5e7eb !important;
+    background: #f9fafb !important;
+    color: #d1d5db !important;
+}
+
 #cart-section {
     background: var(--white);
     border-radius: var(--radius-lg);

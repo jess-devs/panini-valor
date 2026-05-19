@@ -15,12 +15,13 @@ import {
   DEFAULT_RATE,
 } from "./converter.js";
 import { openDialog, closeDialog } from "./transitions.js";
-import { GROUPS, TEAM_DISPLAY, TEAM_COUNTRY, buildChecklistMap } from "./checklist.js";
+import { GROUPS, TEAM_DISPLAY, TEAM_COUNTRY, buildChecklistMap, getMissingEntries } from "./checklist.js";
 
 const ICON = {
   plus: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
   check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
   x: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  warning: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
   user: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   userSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   pencil: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
@@ -265,12 +266,27 @@ function runQuery() {
   }
 
   if (activeTeam) {
-    const found = query.length >= 2 ? search(query, activeIndex, activePool) : activePool;
-    renderResults(found);
+    if (query.length >= 2) {
+      renderResults(search(query, activeIndex, activePool));
+      return;
+    }
+    const matchedCodes = new Set(activePool.map((p) => p.sticker_code).filter(Boolean));
+    const missing = getMissingEntries(activeTeam, matchedCodes);
+    const synth = missing.map((e) => ({
+      _missing: true,
+      name: e.name,
+      sticker_code: e.code,
+      sticker_team: e.team,
+      country_of_citizenship: TEAM_COUNTRY[e.team],
+      position: null,
+      market_value_in_eur: null,
+      image_url: "",
+      player_id: null,
+    }));
+    renderResults([...synth, ...activePool]);
     return;
   }
 
-  // Solo grupo: pedir texto para no abrumar
   if (query.length < 2) {
     $results.innerHTML = `<p class="empty-msg">Escribí un nombre para buscar dentro del Grupo ${activeGroup}.</p>`;
     return;
@@ -315,14 +331,14 @@ function renderResults(found) {
   if (found.length === 0) {
     $results.innerHTML = `<p class="empty-msg">${
       activeTeam || activeGroup
-        ? "No se encontraron jugadores para este filtro en el catálogo."
-        : "No se encontró ningún jugador con ese nombre en las 48 selecciones del Mundial 2026."
+        ? "No se encontraron jugadores para este filtro en el catálogo. Algunos jugadores del álbum Panini pueden no estar disponibles en la base de datos de Transfermarkt."
+        : "No se encontró ningún jugador con ese nombre en las 48 selecciones del Mundial 2026. Algunos jugadores pueden no estar en nuestra base de datos de Transfermarkt."
     }</p>`;
     return;
   }
   const inCart = new Set(cartIds());
   $results.innerHTML = found
-    .map((p) => cardHTML(p, inCart.has(String(p.player_id))))
+    .map((p) => p._missing ? missingCardHTML(p) : cardHTML(p, inCart.has(String(p.player_id))))
     .join("");
 }
 
@@ -368,6 +384,41 @@ function cardHTML(p, added) {
     <button class="add-btn${added ? " add-btn--added" : ""}" data-add-id="${p.player_id}"
       title="${added ? "Ya está en tu lista" : "Agregar a mi lista"}" aria-label="${added ? "Agregado" : "Agregar"}">
       ${added ? ICON.check : ICON.plus}
+    </button>
+  </div>`;
+}
+
+/**
+ * Genera el HTML de una tarjeta para un jugador del checklist sin datos en el CSV.
+ * @param {object} p - Objeto sintético con _missing: true
+ * @returns {string}
+ */
+function missingCardHTML(p) {
+  const country = getCountryDisplay(p.country_of_citizenship);
+  const iso = getISO(p.country_of_citizenship);
+  const dot = iso
+    ? `<div class="player-flag-dot"><span class="fi fi-${iso}"></span></div>`
+    : "";
+
+  return `
+  <div class="card card--missing">
+    ${p.sticker_code ? `<span class="sticker-code sticker-code--missing">${p.sticker_code}</span>` : ""}
+    <div class="player-photo-wrap">
+      <div class="player-placeholder player-placeholder--missing">${ICON.warning}</div>
+      ${dot}
+    </div>
+    <div class="card-body">
+      <p class="player-name">${p.name}</p>
+      <div class="player-meta">
+        <span class="player-country">${country}</span>
+        <span class="missing-badge">Sin datos</span>
+      </div>
+      <div class="card-pricing">
+        <span class="missing-hint">No disponible en la base de Transfermarkt</span>
+      </div>
+    </div>
+    <button class="add-btn add-btn--missing" disabled title="Sin datos en el catálogo" aria-label="Sin datos">
+      ${ICON.x}
     </button>
   </div>`;
 }
