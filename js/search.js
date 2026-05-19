@@ -1,8 +1,32 @@
 import { getCountryDisplay } from "./data.js";
 
+/**
+ * Mapa de caracteres que no se descomponen vía NFD hacia su equivalente ASCII.
+ * @type {Record<string, string>}
+ */
+const TRANSLITERATE = {
+  "\u00D8": "O",  // Ø
+  "\u00F8": "o",  // ø
+  "\u00C6": "AE", // Æ
+  "\u00E6": "ae", // æ
+  "\u00D0": "D",  // Ð
+  "\u00F0": "d",  // ð
+  "\u00DE": "TH", // Þ
+  "\u00FE": "th", // þ
+  "\u00DF": "ss", // ß
+  "\u0130": "I",  // İ (Turkish dotted capital I)
+  "\u0131": "i",  // ı (Turkish dotless i)
+  "\u0152": "OE", // Œ
+  "\u0153": "oe", // œ
+};
+
 export function normalize(str) {
   if (!str) return "";
-  return str.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  let result = "";
+  for (const ch of str) {
+    result += TRANSLITERATE[ch] || ch;
+  }
+  return result.toLowerCase().normalize("NFD").replace(/[\u0300-\u036F]/g, "");
 }
 
 /**

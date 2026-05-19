@@ -1,6 +1,6 @@
-import { downloadAndParse } from "./data.js";
+import { downloadAndParse, normalizeCountryName } from "./data.js";
 import { normalize } from "./search.js";
-import { CHECKLIST, TEAM_COUNTRY } from "./checklist.js";
+import { CHECKLIST, TEAM_COUNTRY, PLAYER_ALIASES } from "./checklist.js";
 
 async function runTest() {
   console.group("Panini Checklist — cobertura en el CSV");
@@ -11,7 +11,7 @@ async function runTest() {
   // Índice rápido: "nombre_normalizado|country_of_citizenship" → player
   const byNameCountry = new Map();
   for (const p of players) {
-    byNameCountry.set(`${normalize(p.name || "")}|${p.country_of_citizenship}`, p);
+    byNameCountry.set(`${normalize(p.name || "")}|${normalizeCountryName(p.country_of_citizenship)}`, p);
   }
 
   let total = 0;
@@ -22,7 +22,8 @@ async function runTest() {
     const country = TEAM_COUNTRY[team];
     for (const entry of entries) {
       total++;
-      if (byNameCountry.has(`${normalize(entry.name)}|${country}`)) {
+      const lookupName = normalize(PLAYER_ALIASES[entry.name] ?? entry.name);
+      if (byNameCountry.has(`${lookupName}|${country}`)) {
         found++;
       } else {
         missing.push({ code: entry.code, name: entry.name, team, country });

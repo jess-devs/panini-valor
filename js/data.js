@@ -5,7 +5,7 @@ export const CSV_URL = "data/players.csv.gz";
  * @param {string} country
  * @returns {string}
  */
-function normalizeCountryName(country) {
+export function normalizeCountryName(country) {
   const trimmed = (country || "").trim();
   return COUNTRY_ALIASES[trimmed] || trimmed;
 }
@@ -24,6 +24,8 @@ const COUNTRY_ALIASES = {
   "Bosnia and Herzegovina": "Bosnia-Herzegovina",
   "Bosnia & Herzegovina": "Bosnia-Herzegovina",
   "Cabo Verde": "Cape Verde",
+  "Türkiye": "Turkey",
+  "Curaçao": "Curacao",
 };
 
 /**

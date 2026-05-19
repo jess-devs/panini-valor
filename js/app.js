@@ -3,6 +3,7 @@ import {
   getISO,
   getCountryDisplay,
   getPositionES,
+  normalizeCountryName,
 } from "./data.js";
 import { buildIndex, search, normalize } from "./search.js";
 import {
@@ -221,7 +222,7 @@ async function init() {
     const globalCodeMap = buildChecklistMap(null, null);
     players = players.map((p) => {
       const entry = globalCodeMap.get(normalize(p.name || ""));
-      const match = entry && TEAM_COUNTRY[entry.team] === p.country_of_citizenship;
+      const match = entry && TEAM_COUNTRY[entry.team] === normalizeCountryName(p.country_of_citizenship);
       return match ? { ...p, sticker_code: entry.code, sticker_team: entry.team } : p;
     });
     searchIndex = buildIndex(players);

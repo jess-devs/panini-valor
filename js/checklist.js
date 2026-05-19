@@ -1,5 +1,48 @@
 import { normalize } from "./search.js";
 
+/**
+ * Mapa de alias: nombre del checklist → nombre exacto en el CSV de Transfermarkt.
+ * Se usa cuando el checklist usa un apodo, transliteración distinta o variante.
+ * @type {Record<string, string>}
+ */
+export const PLAYER_ALIASES = {
+  // Cabo Verde — apodos
+  "Diney": "Diney Borges",
+  "Yannick Semedo": "Semedo",
+  // Sudáfrica — typo en checklist
+  "Bathasi Aubaas": "Bathusi Aubaas",
+  // Canadá — nombre abreviado en CSV
+  "Samuel Adekugbe": "Sam Adekugbe",
+  // Marruecos — transliteración
+  "Roman Saiss": "Romain Saïss",
+  "Jawad El Yamio": "Jawad El Yamiq",
+  // Paraguay — nombre completo vs corto
+  "Matias Galarza Fonda": "Matías Galarza",
+  // Australia — variante de apellido
+  "Kusini Vengi": "Kusini Yengi",
+  // Irán — transliteración
+  "Saeed Ezatolahi": "Saeid Ezatolahi",
+  // Nueva Zelanda — sin segundo apellido en CSV
+  "Max Crocombe Payne": "Max Crocombe",
+  // España — diminutivo
+  "Dani Carvajal": "Daniel Carvajal",
+  // Noruega — sin segundo nombre en CSV
+  "Kristoffer Vassbakk Ajer": "Kristoffer Ajer",
+  // Argelia — transliteración
+  "Houssem Aquar": "Houssem Aouar",
+  "Nabil Bentalab": "Nabil Bentaleb",
+  "Mohammed Amoura": "Mohamed Amoura",
+  // Uzbekistán — romanización alternativa
+  "Rustamjon Ashurmatov": "Rustam Ashurmatov",
+  "Odiljon Hamrobekov": "Odildzhon Khamrobekov",
+  "Khojimat Erkinov": "Khozhimat Erkinov",
+  // RD Congo — nombre completo vs parcial
+  "Lionel Mpasi": "Lionel Mpasi-Nzau",
+  "Meschak Elia": "Meschack Elia",
+  // Ghana — nombre completo vs corto
+  "Abdul Issahaku Fatawu": "Abdul Fatawu",
+};
+
 /** @type {Record<string, string>} Código de equipo → country_of_citizenship del CSV */
 export const TEAM_COUNTRY = {
   MEX: "Mexico", RSA: "South Africa", KOR: "Korea, South", CZE: "Czech Republic",
@@ -1027,7 +1070,8 @@ export function buildChecklistMap(group, teamCode) {
   const teams = teamCode ? [teamCode] : group ? GROUPS[group] : Object.keys(CHECKLIST);
   for (const team of teams) {
     for (const entry of CHECKLIST[team] || []) {
-      map.set(normalize(entry.name), { code: entry.code, team });
+      const name = PLAYER_ALIASES[entry.name] ?? entry.name;
+      map.set(normalize(name), { code: entry.code, team });
     }
   }
   return map;
