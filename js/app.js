@@ -14,6 +14,7 @@ import {
   DEFAULT_RATE,
 } from "./converter.js";
 import { openDialog, closeDialog } from "./transitions.js";
+import { GROUPS, TEAM_DISPLAY, getFilteredCountries, buildChecklistMap } from "./checklist.js";
 
 const ICON = {
   plus: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
@@ -34,6 +35,9 @@ let currentRate = loadRate();
 const CART_KEY = "panini_cart";
 /** @type {object[]} */
 let cart = [];
+
+let activeGroup = "";
+let activeTeam = "";
 
 const estimatedValues = new Map();
 const editedValues = new Map();
@@ -168,6 +172,8 @@ const $cartCount = document.getElementById("cart-count");
 const $disclaimerDialog = document.getElementById("disclaimer-dialog");
 const $disclaimerClose = document.getElementById("disclaimer-close");
 const $disclaimerTrigger = document.getElementById("disclaimer-trigger");
+const $filterGroup = document.getElementById("filter-group");
+const $filterTeam = document.getElementById("filter-team");
 
 /**
  * Genera el HTML de una tarjeta skeleton para el estado de carga.
@@ -210,6 +216,12 @@ async function init() {
       $progress.style.width = pct * 100 + "%";
       if (pct >= 1) $loadMsg.textContent = "Procesando jugadores…";
     });
+    const globalCodeMap = buildChecklistMap(null, null);
+    players = players.map((p) => {
+      const norm = (p.name || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+      const code = globalCodeMap.get(norm);
+      return code ? { ...p, sticker_code: code } : p;
+    });
     searchIndex = buildIndex(players);
     loadCart(players);
 
@@ -227,14 +239,71 @@ async function init() {
   }
 }
 
-$searchBox.addEventListener("input", () => {
-  const query = $searchBox.value;
-  if (!query || query.trim().length < 2) {
-    $results.innerHTML = "";
+function getFilteredPlayers() {
+  if (!activeGroup && !activeTeam) return players;
+  const allowedTeams = new Set(
+    activeTeam ? [activeTeam] : (GROUPS[activeGroup] || []),
+  );
+  return players.filter((p) => {
+    const teamPrefix = p.sticker_code?.match(/^[A-Z]+/)?.[0] || "";
+    return p.sticker_code && allowedTeams.has(teamPrefix);
+  });
+}
+
+function runQuery() {
+  const query = $searchBox.value.trim();
+  const pool = getFilteredPlayers();
+  const hasFilter = activeGroup || activeTeam;
+
+  if (!hasFilter) {
+    if (query.length < 2) { $results.innerHTML = ""; return; }
+    renderResults(search(query, buildIndex(pool), pool), query);
     return;
   }
-  const found = search(query, searchIndex, players);
-  renderResults(found, query);
+
+  if (activeTeam) {
+    const found = query.length >= 2 ? search(query, buildIndex(pool), pool) : pool;
+    renderResults(found, query || " ");
+    return;
+  }
+
+  // Solo grupo: pedir texto para no abrumar
+  if (query.length < 2) {
+    $results.innerHTML = `<p class="empty-msg">Escribí un nombre para buscar dentro del Grupo ${activeGroup}.</p>`;
+    return;
+  }
+  renderResults(search(query, buildIndex(pool), pool), query);
+}
+
+function updateTeamDropdown() {
+  $filterTeam.innerHTML = `<option value="">Todas las selecciones</option>`;
+  const codes = activeGroup
+    ? GROUPS[activeGroup]
+    : Object.keys(TEAM_DISPLAY).sort((a, b) =>
+        TEAM_DISPLAY[a].localeCompare(TEAM_DISPLAY[b], "es"),
+      );
+  codes.forEach((code) => {
+    const opt = document.createElement("option");
+    opt.value = code;
+    opt.textContent = TEAM_DISPLAY[code];
+    $filterTeam.appendChild(opt);
+  });
+  $filterTeam.value = "";
+  $filterTeam.disabled = false;
+}
+
+$searchBox.addEventListener("input", runQuery);
+
+$filterGroup.addEventListener("change", () => {
+  activeGroup = $filterGroup.value;
+  activeTeam = "";
+  updateTeamDropdown();
+  runQuery();
+});
+
+$filterTeam.addEventListener("change", () => {
+  activeTeam = $filterTeam.value;
+  runQuery();
 });
 
 /**
@@ -243,12 +312,16 @@ $searchBox.addEventListener("input", () => {
  * @param {string}   query
  */
 function renderResults(found, query) {
-  if (!query || query.trim().length < 2) {
+  if (!activeGroup && !activeTeam && (!query || query.trim().length < 2)) {
     $results.innerHTML = "";
     return;
   }
   if (found.length === 0) {
-    $results.innerHTML = `<p class="empty-msg">No se encontró ningún jugador con ese nombre en las 48 selecciones del Mundial 2026.</p>`;
+    $results.innerHTML = `<p class="empty-msg">${
+      activeTeam || activeGroup
+        ? "No se encontraron jugadores para este filtro en el catálogo."
+        : "No se encontró ningún jugador con ese nombre en las 48 selecciones del Mundial 2026."
+    }</p>`;
     return;
   }
   const inCart = new Set(cartIds());
@@ -284,7 +357,7 @@ function cardHTML(p, added) {
   <div class="card">
     <div class="player-photo-wrap">${photo}${ph}${dot}</div>
     <div class="card-body">
-      <p class="player-name">${p.name}</p>
+      <p class="player-name">${p.name}${p.sticker_code ? `<span class="sticker-code">${p.sticker_code}</span>` : ""}</p>
       <div class="player-meta">
         <span class="player-country">${country}</span>
         <span class="player-pos-badge">${pos}</span>
@@ -603,4 +676,5 @@ $resetBtn.addEventListener("click", () => {
   $fColones.value = DEFAULT_RATE.colones;
 });
 
+updateTeamDropdown();
 init();
