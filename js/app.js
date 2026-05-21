@@ -176,8 +176,25 @@ const $cartCount = document.getElementById("cart-count");
 const $disclaimerDialog = document.getElementById("disclaimer-dialog");
 const $disclaimerClose = document.getElementById("disclaimer-close");
 const $disclaimerTrigger = document.getElementById("disclaimer-trigger");
-const $filterGroup = document.getElementById("filter-group");
-const $filterTeam = document.getElementById("filter-team");
+const $filterTrigger = document.getElementById("filter-trigger");
+const $filterTriggerLabel = document.getElementById("filter-trigger-label");
+const $filterChipClear = document.getElementById("filter-chip-clear");
+const $filterChipText = document.getElementById("filter-chip-text");
+const $filterDialog = document.getElementById("filter-dialog");
+const $filterDialogClose = document.getElementById("filter-dialog-close");
+const $filterGroupGrid = document.getElementById("filter-group-grid");
+const $filterGroupsView = document.getElementById("filter-groups-view");
+const $filterTeamsView = document.getElementById("filter-teams-view");
+const $filterTeamGrid = document.getElementById("filter-team-grid");
+const $filterTeamsLabel = document.getElementById("filter-teams-label");
+const $filterBackBtn = document.getElementById("filter-back-btn");
+const $filterApplyGroupBtn = document.getElementById("filter-apply-group-btn");
+const $filterDialogClear = document.getElementById("filter-dialog-clear");
+const $cartSortBtn = document.getElementById("cart-sort-btn");
+const $sortPopover = document.getElementById("sort-popover");
+const $cartBar = document.getElementById("cart-bar");
+const $cartBarCount = document.getElementById("cart-bar-count");
+const $cartBarTotal = document.getElementById("cart-bar-total");
 
 /**
  * Genera el HTML de una tarjeta skeleton para el estado de carga.
@@ -294,38 +311,8 @@ function runQuery() {
   renderResults(search(query, activeIndex, activePool));
 }
 
-function updateTeamDropdown() {
-  $filterTeam.innerHTML = `<option value="">Todas las selecciones</option>`;
-  const codes = activeGroup
-    ? GROUPS[activeGroup]
-    : Object.keys(TEAM_DISPLAY).sort((a, b) =>
-        TEAM_DISPLAY[a].localeCompare(TEAM_DISPLAY[b], "es"),
-      );
-  codes.forEach((code) => {
-    const opt = document.createElement("option");
-    opt.value = code;
-    opt.textContent = TEAM_DISPLAY[code];
-    $filterTeam.appendChild(opt);
-  });
-  $filterTeam.value = "";
-  $filterTeam.disabled = false;
-}
 
 $searchBox.addEventListener("input", runQuery);
-
-$filterGroup.addEventListener("change", () => {
-  activeGroup = $filterGroup.value;
-  activeTeam = "";
-  updateTeamDropdown();
-  applyFilter();
-  runQuery();
-});
-
-$filterTeam.addEventListener("change", () => {
-  activeTeam = $filterTeam.value;
-  applyFilter();
-  runQuery();
-});
 
 function renderResults(found) {
   if (found.length === 0) {
@@ -457,13 +444,14 @@ function renderCart() {
   if (!cart.length) {
     $cartSection.classList.add("cart--empty");
     $cartTotal.textContent = "—";
+    if ($cartBar) $cartBar.classList.remove("cart-bar--visible");
     return;
   }
 
   $cartSection.classList.remove("cart--empty");
   let subtotal = 0;
 
-  $cartBody.innerHTML = cart
+  $cartBody.innerHTML = getSortedCart()
     .map((p) => {
       const id = String(p.player_id);
       const hasPrice = !!p.market_value_in_eur;
@@ -552,6 +540,13 @@ function renderCart() {
     .join("");
 
   $cartTotal.textContent = formatCRC(subtotal);
+
+  if ($cartBar) {
+    const count = cart.length;
+    $cartBar.classList.add("cart-bar--visible");
+    $cartBarCount.textContent = `${count} postal${count !== 1 ? "es" : ""}`;
+    $cartBarTotal.textContent = formatCRC(subtotal);
+  }
 }
 
 $cartBody.addEventListener("click", (e) => {
@@ -721,5 +716,157 @@ $resetBtn.addEventListener("click", () => {
   $fColones.value = DEFAULT_RATE.colones;
 });
 
-updateTeamDropdown();
+// ── Sort ────────────────────────────────────────────────
+let cartSortMode = "default";
+
+function getEffectiveEUR(p) {
+  const id = String(p.player_id);
+  if (p.market_value_in_eur) return editedValues.get(id) || p.market_value_in_eur;
+  return estimatedValues.get(id) || 0;
+}
+
+function getSortedCart() {
+  const arr = [...cart];
+  if (cartSortMode === "price-desc") return arr.sort((a, b) => getEffectiveEUR(b) - getEffectiveEUR(a));
+  if (cartSortMode === "price-asc")  return arr.sort((a, b) => getEffectiveEUR(a) - getEffectiveEUR(b));
+  if (cartSortMode === "name-asc")   return arr.sort((a, b) => a.name.localeCompare(b.name, "es"));
+  return arr;
+}
+
+$cartSortBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  $sortPopover.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  if (!$cartSortBtn.contains(e.target)) $sortPopover.classList.add("hidden");
+});
+
+$sortPopover.addEventListener("click", (e) => {
+  const opt = e.target.closest("[data-sort]");
+  if (!opt) return;
+  cartSortMode = opt.dataset.sort;
+  $sortPopover.classList.add("hidden");
+  $sortPopover.querySelectorAll(".sort-option").forEach((btn) => {
+    btn.classList.toggle("sort-option--active", btn.dataset.sort === cartSortMode);
+  });
+  $cartSortBtn.classList.toggle("cart-sort-btn--active", cartSortMode !== "default");
+  renderCart();
+});
+
+// ── Filter dialog ────────────────────────────────────────
+let dialogSelectedGroup = "";
+
+function renderGroupGrid() {
+  $filterGroupGrid.innerHTML = Object.entries(GROUPS).map(([groupCode, teams]) => {
+    const flags = teams.map((t) => {
+      const iso = getISO(TEAM_COUNTRY[t]);
+      return iso ? `<span class="fi fi-${iso} filter-flag-sm"></span>` : "";
+    }).join("");
+    const isActive = activeGroup === groupCode && !activeTeam;
+    return `<button class="filter-group-card${isActive ? " filter-group-card--active" : ""}" data-group="${groupCode}" type="button">
+      <span class="filter-group-letter">Grupo ${groupCode}</span>
+      <div class="filter-group-flags">${flags}</div>
+    </button>`;
+  }).join("");
+}
+
+function renderTeamGrid(groupCode) {
+  const teams = GROUPS[groupCode] || [];
+  $filterTeamGrid.innerHTML = teams.map((t) => {
+    const iso = getISO(TEAM_COUNTRY[t]);
+    const name = TEAM_DISPLAY[t] || t;
+    const isActive = activeTeam === t;
+    return `<button class="filter-team-card${isActive ? " filter-team-card--active" : ""}" data-team="${t}" data-group="${groupCode}" type="button">
+      ${iso ? `<span class="fi fi-${iso} filter-flag-lg"></span>` : ""}
+      <span class="filter-team-name">${name}</span>
+    </button>`;
+  }).join("");
+}
+
+function showGroupsView() {
+  renderGroupGrid();
+  $filterGroupsView.hidden = false;
+  $filterTeamsView.hidden = true;
+}
+
+function showTeamsView(groupCode) {
+  dialogSelectedGroup = groupCode;
+  $filterTeamsLabel.textContent = `Grupo ${groupCode}`;
+  renderTeamGrid(groupCode);
+  $filterGroupsView.hidden = true;
+  $filterTeamsView.hidden = false;
+}
+
+function openFilterDialog() {
+  showGroupsView();
+  $filterDialog.showModal();
+}
+
+function closeFilterDialog() {
+  $filterDialog.close();
+}
+
+function updateFilterChip() {
+  if (!activeGroup && !activeTeam) {
+    $filterTriggerLabel.textContent = "Filtrar por grupo o selección";
+    $filterTrigger.classList.remove("filter-trigger-btn--active");
+    $filterChipClear.hidden = true;
+    return;
+  }
+  $filterTrigger.classList.add("filter-trigger-btn--active");
+  const label = activeTeam ? TEAM_DISPLAY[activeTeam] : `Grupo ${activeGroup}`;
+  $filterTriggerLabel.textContent = label;
+  $filterChipText.textContent = label;
+  $filterChipClear.hidden = false;
+}
+
+function applyGroupFilter(groupCode) {
+  activeGroup = groupCode;
+  activeTeam = "";
+  applyFilter();
+  updateFilterChip();
+  closeFilterDialog();
+  runQuery();
+}
+
+function applyTeamFilter(teamCode, groupCode) {
+  activeGroup = groupCode;
+  activeTeam = teamCode;
+  applyFilter();
+  updateFilterChip();
+  closeFilterDialog();
+  runQuery();
+}
+
+function clearFilter() {
+  activeGroup = "";
+  activeTeam = "";
+  applyFilter();
+  updateFilterChip();
+  runQuery();
+}
+
+$filterTrigger.addEventListener("click", openFilterDialog);
+$filterDialogClose.addEventListener("click", closeFilterDialog);
+$filterChipClear.addEventListener("click", clearFilter);
+$filterBackBtn.addEventListener("click", showGroupsView);
+
+$filterApplyGroupBtn.addEventListener("click", () => {
+  applyGroupFilter(dialogSelectedGroup);
+});
+
+$filterDialogClear.addEventListener("click", () => {
+  clearFilter();
+  closeFilterDialog();
+});
+
+$filterDialog.addEventListener("click", (e) => {
+  if (e.target === $filterDialog) { closeFilterDialog(); return; }
+  const teamCard = e.target.closest("[data-team]");
+  if (teamCard) { applyTeamFilter(teamCard.dataset.team, teamCard.dataset.group); return; }
+  const groupCard = e.target.closest("[data-group]");
+  if (groupCard && !$filterGroupsView.hidden) showTeamsView(groupCard.dataset.group);
+});
+
 init();

@@ -27,6 +27,7 @@
 
         <link rel="stylesheet" href="css/style.css" />
         <link rel="stylesheet" href="css/mobile.css" />
+        <meta name="theme-color" content="#0e1b3d" />
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
         <script type="module" src="js/test-checklist.js"></script>
@@ -151,24 +152,14 @@
                     />
                 </div>
                 <div class="filter-row">
-                    <select id="filter-group" aria-label="Filtrar por grupo">
-                        <option value="">Todos los grupos</option>
-                        <option value="A">Grupo A</option>
-                        <option value="B">Grupo B</option>
-                        <option value="C">Grupo C</option>
-                        <option value="D">Grupo D</option>
-                        <option value="E">Grupo E</option>
-                        <option value="F">Grupo F</option>
-                        <option value="G">Grupo G</option>
-                        <option value="H">Grupo H</option>
-                        <option value="I">Grupo I</option>
-                        <option value="J">Grupo J</option>
-                        <option value="K">Grupo K</option>
-                        <option value="L">Grupo L</option>
-                    </select>
-                    <select id="filter-team" aria-label="Filtrar por selección" disabled>
-                        <option value="">Todas las selecciones</option>
-                    </select>
+                    <button id="filter-trigger" class="filter-trigger-btn" type="button">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                        <span id="filter-trigger-label">Filtrar por grupo o selección</span>
+                    </button>
+                    <button id="filter-chip-clear" class="filter-chip-clear" hidden type="button" aria-label="Limpiar filtro">
+                        <span id="filter-chip-text"></span>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
                 </div>
             </div>
 
@@ -197,27 +188,52 @@
                         <h2 class="cart-title">Mi lista de postales</h2>
                         <span id="cart-count" class="cart-badge">0</span>
                     </div>
-                    <button id="clear-cart" class="btn-danger-ghost">
-                        <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        >
-                            <polyline points="3 6 5 6 21 6" />
-                            <path
-                                d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
-                            />
-                            <path
-                                d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
-                            />
-                        </svg>
-                        Vaciar
-                    </button>
+                    <div class="cart-actions">
+                        <div class="cart-sort-wrap">
+                            <button id="cart-sort-btn" class="cart-sort-btn" type="button" title="Ordenar lista" aria-label="Ordenar lista">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="14" y2="6"/><line x1="3" y1="12" x2="9" y2="12"/><polyline points="12 15 15 18 18 15"/><line x1="15" y1="6" x2="15" y2="18"/></svg>
+                            </button>
+                            <div id="sort-popover" class="sort-popover hidden" role="menu">
+                                <button class="sort-option" data-sort="default" role="menuitem" type="button">
+                                    <svg class="sort-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Orden original
+                                </button>
+                                <button class="sort-option" data-sort="price-desc" role="menuitem" type="button">
+                                    <svg class="sort-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Mayor precio primero
+                                </button>
+                                <button class="sort-option" data-sort="price-asc" role="menuitem" type="button">
+                                    <svg class="sort-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Menor precio primero
+                                </button>
+                                <button class="sort-option" data-sort="name-asc" role="menuitem" type="button">
+                                    <svg class="sort-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Nombre A–Z
+                                </button>
+                            </div>
+                        </div>
+                        <button id="clear-cart" class="btn-danger-ghost">
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <polyline points="3 6 5 6 21 6" />
+                                <path
+                                    d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                                />
+                                <path
+                                    d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+                                />
+                            </svg>
+                            Vaciar
+                        </button>
+                    </div>
                 </div>
                 <div class="cart-empty-state" id="cart-empty-state">
                     <svg
@@ -393,7 +409,7 @@
                 </p>
                 <div class="rate-row">
                     <div class="form-group">
-                        <label for="f-millones">Millones EUR</label>
+                        <label for="f-millones">Millones €</label>
                         <div class="input-wrap">
                             <span class="input-prefix">€M</span>
                             <input
@@ -405,9 +421,9 @@
                             />
                         </div>
                     </div>
-                    <div class="rate-equals">=</div>
+                    <div class="rate-equals" aria-hidden="true">=</div>
                     <div class="form-group">
-                        <label for="f-colones">Colones CRC</label>
+                        <label for="f-colones">Colones ₡</label>
                         <div class="input-wrap">
                             <span class="input-prefix">₡</span>
                             <input
@@ -429,6 +445,51 @@
                     </button>
                 </div>
             </div>
+        </div>
+
+        <!-- ── Filter dialog ───────────────────────── -->
+        <dialog id="filter-dialog" class="filter-dialog">
+            <div class="filter-dialog-inner">
+                <div class="filter-dialog-head">
+                    <h2 class="filter-dialog-title">Filtrar jugadores</h2>
+                    <button id="filter-dialog-close" class="filter-dialog-close" aria-label="Cerrar" type="button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div id="filter-groups-view" class="filter-view">
+                    <p class="filter-view-label">Seleccioná un grupo</p>
+                    <div id="filter-group-grid" class="filter-group-grid"></div>
+                </div>
+                <div id="filter-teams-view" class="filter-view" hidden>
+                    <button id="filter-back-btn" class="filter-back-btn" type="button">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        Todos los grupos
+                    </button>
+                    <p id="filter-teams-label" class="filter-view-label">Grupo A</p>
+                    <div id="filter-team-grid" class="filter-team-grid"></div>
+                    <button id="filter-apply-group-btn" class="filter-apply-group-btn" type="button">
+                        Ver todo el grupo
+                    </button>
+                </div>
+                <div class="filter-dialog-footer">
+                    <button id="filter-dialog-clear" class="filter-dialog-clear-btn" type="button">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Limpiar filtro
+                    </button>
+                </div>
+            </div>
+        </dialog>
+
+        <!-- ── Cart bar mobile ──────────────────── -->
+        <div id="cart-bar" class="cart-bar" role="status" aria-live="polite">
+            <div class="cart-bar-info">
+                <span id="cart-bar-count" class="cart-bar-count">0 postales</span>
+                <span id="cart-bar-total" class="cart-bar-total">—</span>
+            </div>
+            <a href="#cart-section" class="cart-bar-link">
+                Ver lista
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
         </div>
 
         <script type="module" src="js/app.js"></script>
