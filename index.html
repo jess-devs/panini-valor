@@ -2,7 +2,7 @@
 <html lang="es">
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
         <title>Panini Valor · Mundial 2026</title>
         <meta
             name="description"
@@ -73,6 +73,10 @@
                     <span class="header-sub">Mundial 2026</span>
                 </div>
             </div>
+            <nav class="header-nav" aria-label="Navegación principal">
+                <a href="como-usar.html" class="header-nav-link">Cómo usar</a>
+                <a href="about.html" class="header-nav-link">Acerca de</a>
+            </nav>
             <div class="header-actions">
                 <a
                     href="https://github.com/jess-devs/panini-valor"
@@ -289,57 +293,66 @@
         <!-- ── Footer ──────────────────────────── -->
         <footer class="site-footer">
             <div class="footer-inner">
-                <div class="footer-links">
-                    <a href="about.html">Acerca de</a>
-                    <span class="footer-sep">·</span>
-                    <a href="como-usar.html">Cómo usar</a>
-                    <span class="footer-sep">·</span>
-                    <a
-                        href="https://github.com/jess-devs/panini-valor"
-                        target="_blank"
-                        rel="noopener"
-                    >
-                        <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+                <div class="footer-top">
+                    <div class="footer-brand">
+                        <img
+                            src="files/img/2026_FIFA_World_Cup_emblem.svg.png"
+                            alt=""
+                            class="footer-logo"
+                            aria-hidden="true"
+                        />
+                        <span class="footer-brand-name">Mi Postal</span>
+                    </div>
+                    <nav class="footer-nav" aria-label="Pie de página">
+                        <a href="como-usar.html" class="footer-nav-link">Cómo usar</a>
+                        <a href="about.html" class="footer-nav-link">Acerca de</a>
+                        <a
+                            href="https://github.com/jess-devs/panini-valor"
+                            target="_blank"
+                            rel="noopener"
+                            class="footer-nav-link"
                         >
-                            <path
-                                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
-                            />
-                        </svg>
-                        GitHub
-                    </a>
-                    <button
-                        id="disclaimer-trigger"
-                        class="footer-disclaimer-btn"
-                    >
-                        <svg
-                            width="13"
-                            height="13"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                            </svg>
+                            GitHub
+                        </a>
+                        <button
+                            id="disclaimer-trigger"
+                            class="footer-disclaimer-btn"
                         >
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="12" y1="8" x2="12" y2="12" />
-                            <line x1="12" y1="16" x2="12.01" y2="16" />
-                        </svg>
-                        Aviso legal
-                    </button>
+                            <svg
+                                width="13"
+                                height="13"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            Aviso legal
+                        </button>
+                    </nav>
                 </div>
-                <p class="footer-copy">
-                    Proyecto independiente · No afiliado con FIFA ni Panini
-                    Group
-                </p>
+                <div class="footer-bottom">
+                    <p class="footer-copy">
+                        Proyecto independiente · No afiliado con FIFA ni Panini Group
+                    </p>
+                </div>
             </div>
         </footer>
 

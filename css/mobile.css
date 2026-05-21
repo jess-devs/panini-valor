@@ -7,8 +7,12 @@
 
     /* ── Header ──────────────────────────────────── */
     header {
-        padding: 0 16px;
-        height: 56px;
+        padding: env(safe-area-inset-top) 16px 12px;
+        height: calc(56px + env(safe-area-inset-top));
+    }
+
+    .header-nav {
+        display: none;
     }
 
     .header-logo-icon {
@@ -42,7 +46,7 @@
 
     /* ── Main ────────────────────────────────────── */
     main {
-        padding: 24px 16px 120px; /* extra bottom for cart-bar */
+        padding: 24px 16px max(120px, calc(90px + env(safe-area-inset-bottom)));
     }
 
     /* ── Search section ──────────────────────────── */
@@ -389,8 +393,15 @@
     }
 
     /* ── Footer ──────────────────────────────────── */
-    .site-footer {
-        padding-bottom: env(safe-area-inset-bottom);
+    .footer-top {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .footer-nav {
+        justify-content: center;
     }
 
     /* ── Cart bar ────────────────────────────────── */
@@ -412,7 +423,7 @@
     }
 
     .filter-dialog[open] {
-        animation: sheetIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+        animation: filterSheetIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
 
     .filter-group-grid {
