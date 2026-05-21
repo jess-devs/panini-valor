@@ -1,0 +1,489 @@
+/* ═══════════════════════════════════════════════
+   PAGES — about.html & como-usar.html
+   Panini Valor · Rediseño 2025
+═══════════════════════════════════════════════ */
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page header ─── */
+.page-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 clamp(16px, 5vw, 32px);
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.page-header-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.page-header-brand img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.page-header-title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.page-header-title span {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.page-header-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--color-ink-muted);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+
+.page-header-back:hover {
+  color: var(--color-ink);
+  background: var(--color-bg);
+}
+
+/* ── Page hero ─── */
+.page-hero {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: clamp(40px, 6vw, 64px) clamp(16px, 5vw, 32px);
+  text-align: center;
+  width: 100%;
+}
+
+.page-hero > * {
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-hero-kicker {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gold);
+  margin-bottom: var(--sp-3);
+}
+
+.page-hero-title {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 800;
+  color: var(--color-ink);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  text-wrap: balance;
+  margin-bottom: var(--sp-4);
+}
+
+.page-hero-sub {
+  font-size: var(--text-base);
+  color: var(--color-ink-muted);
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto;
+  text-wrap: pretty;
+}
+
+/* ── Page content ─── */
+.page-content {
+  flex: 1;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(32px, 5vw, 56px) clamp(16px, 5vw, 32px) clamp(48px, 8vw, 80px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(32px, 5vw, 48px);
+}
+
+/* ── Image banner ─── */
+.img-banner {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.img-banner img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Content section ─── */
+.content-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.section-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-ink-faint);
+}
+
+.section-title {
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 800;
+  color: var(--color-ink);
+  letter-spacing: -0.03em;
+}
+
+.section-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.section-body p {
+  font-size: var(--text-base);
+  color: var(--color-ink-muted);
+  line-height: 1.7;
+}
+
+.section-body code {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.85em;
+  background: var(--color-surface-alt);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--color-primary);
+}
+
+/* ── Feature grid ─── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--sp-3);
+}
+
+.feature-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--sp-6) var(--sp-5);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+
+.feature-card:hover { box-shadow: var(--shadow); }
+
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-gold-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gold);
+  margin-bottom: var(--sp-4);
+}
+
+.feature-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-2);
+}
+
+.feature-desc {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  line-height: 1.6;
+}
+
+/* ── Steps ─── */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  gap: var(--sp-4);
+  padding-bottom: var(--sp-6);
+  position: relative;
+}
+
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 36px;
+  width: 1px;
+  height: calc(100% - 20px);
+  background: var(--color-border);
+}
+
+.step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-body { padding-top: var(--sp-2); }
+
+.step-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--sp-2);
+}
+
+.step-desc {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  line-height: 1.65;
+}
+
+/* ── Formula box ─── */
+.formula-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.formula-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-5) var(--sp-6);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.formula-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-faint);
+  flex-shrink: 0;
+}
+
+.formula-expr {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.formula-divider { border: none; }
+
+.formula-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.formula-example {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-6);
+  border-bottom: 1px solid var(--color-border-sub);
+  flex-wrap: wrap;
+}
+
+.formula-example:last-child { border-bottom: none; }
+
+.formula-player {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+
+.formula-calc {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+
+.formula-result {
+  color: var(--color-gold);
+  font-weight: 800;
+  font-size: var(--text-base);
+}
+
+/* ── FAQ ─── */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.faq-item {
+  padding: var(--sp-5) var(--sp-6);
+  border-bottom: 1px solid var(--color-border-sub);
+}
+
+.faq-item:last-child { border-bottom: none; }
+
+.faq-q {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.015em;
+  margin-bottom: var(--sp-2);
+}
+
+.faq-a {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  line-height: 1.65;
+}
+
+/* ── Disclaimer box ─── */
+.disclaimer-box {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  background: var(--color-gold-bg);
+  border: 1px solid var(--color-gold-border);
+  border-radius: var(--radius);
+  color: var(--color-gold-dim);
+}
+
+.disclaimer-box svg { flex-shrink: 0; margin-top: 2px; }
+
+.disclaimer-box p {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+/* ── CTA wrap ─── */
+.cta-wrap {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 12px var(--sp-6);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.18s;
+}
+
+.btn-cta-primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(14,27,61,0.2);
+}
+
+.btn-cta-primary:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-cta-ghost {
+  background: var(--color-surface);
+  color: var(--color-ink-muted);
+  border: 1.5px solid var(--color-border);
+}
+
+.btn-cta-ghost:hover {
+  border-color: var(--color-ink-muted);
+  color: var(--color-ink);
+}
+
+/* ── Page footer ─── */
+.page-footer {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding: var(--sp-5) clamp(16px, 5vw, 32px);
+  text-align: center;
+}
+
+.page-footer p {
+  font-size: var(--text-xs);
+  color: var(--color-ink-faint);
+}
+
+.page-footer a { color: var(--color-ink-muted); }
+.page-footer a:hover { color: var(--color-ink); }
+
+/* ── Mobile ─── */
+@media (max-width: 600px) {
+  .page-hero { padding: 32px 16px; }
+
+  .feature-grid { grid-template-columns: 1fr; }
+
+  .cta-wrap { flex-direction: column; }
+  .btn-cta { justify-content: center; }
+
+  .formula-example { flex-direction: column; align-items: flex-start; gap: 4px; }
+
+  .formula-row { flex-direction: column; align-items: flex-start; }
+}
