@@ -1,5 +1,5 @@
 import { downloadAndParse } from "./data.js";
-import { buildIndex, search } from "./search.js";
+import { buildIndex, search, searchFuzzy } from "./search.js";
 import { calcPrice, formatCRC, loadRate } from "./converter.js";
 
 const CART_KEY = "panini_cart";
@@ -109,14 +109,21 @@ $cameraRetryBtn.addEventListener("click", () => {
 function preprocessSource(source) {
   const w = source.videoWidth || source.naturalWidth || source.width;
   const h = source.videoHeight || source.naturalHeight || source.height;
+
+  // Crop to bottom 35% — the name badge is always in that strip
+  const cropY = Math.floor(h * 0.65);
+  const cropH = h - cropY;
+
   $offscreen.width  = w;
-  $offscreen.height = h;
-  offCtx.drawImage(source, 0, 0);
-  const imgData = offCtx.getImageData(0, 0, w, h);
+  $offscreen.height = cropH;
+  offCtx.drawImage(source, 0, cropY, w, cropH, 0, 0, w, cropH);
+
+  const imgData = offCtx.getImageData(0, 0, w, cropH);
   const d = imgData.data;
   for (let i = 0; i < d.length; i += 4) {
     const luma = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-    const v = luma > 128 ? 255 : 0;
+    // Contrast stretch instead of hard binary threshold — preserves colored badge text
+    const v = Math.min(255, Math.max(0, (luma - 128) * 1.8 + 128));
     d[i] = d[i + 1] = d[i + 2] = v;
   }
   offCtx.putImageData(imgData, 0, 0);
@@ -129,18 +136,36 @@ async function runOCR(canvas) {
   return text;
 }
 
+const NOISE_TOKENS = new Set([
+  "FIFA", "PANINI", "JAKO", "PUMA", "NIKE", "ADIDAS",
+  "OFFICIAL", "LICENSED", "PRODUCT", "WORLD", "CUP",
+  "IRAQ", "IRAN", "FC", "SC", "AC", "CF",
+]);
+
 function extractCandidates(rawText) {
   return rawText
     .split("\n")
     .map((l) => l.replace(/[^a-zA-ZÀ-ÿ\s''-]/g, "").trim())
-    .filter((s) => s.length >= 3 && /[A-ZÁÉÍÓÚÑÜ]{2}/.test(s))
-    .slice(0, 6);
+    .filter((s) => {
+      if (s.length < 4) return false;
+      const words = s.split(/\s+/).filter(Boolean);
+      if (words.length < 2) return false;
+      if (words.some((w) => NOISE_TOKENS.has(w.toUpperCase()))) return false;
+      return /[A-ZÁÉÍÓÚÑÜ]{2}/.test(s);
+    })
+    .slice(0, 3);
 }
 
 function findPlayer(candidates) {
   for (const candidate of candidates) {
     const results = search(candidate, searchIndex, players);
     if (results.length > 0) return results[0];
+  }
+  // Fuzzy fallback with the longest candidate
+  const longest = [...candidates].sort((a, b) => b.length - a.length)[0];
+  if (longest) {
+    const fuzzy = searchFuzzy(longest, searchIndex, players);
+    if (fuzzy.length > 0) return fuzzy[0];
   }
   return null;
 }

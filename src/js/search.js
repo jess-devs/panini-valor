@@ -65,3 +65,29 @@ export function search(query, index, players) {
   }
   return results;
 }
+
+function trigrams(str) {
+  const set = new Set();
+  const s = ` ${str} `;
+  for (let i = 0; i < s.length - 2; i++) set.add(s.slice(i, i + 3));
+  return set;
+}
+
+function jaccardTrigram(a, b) {
+  let intersection = 0;
+  for (const t of a) if (b.has(t)) intersection++;
+  return intersection / (a.size + b.size - intersection);
+}
+
+export function searchFuzzy(query, index, players, threshold = 0.30) {
+  if (!query || query.trim().length < 3) return [];
+  const qNorm = normalize(query.trim());
+  const qTri  = trigrams(qNorm);
+  let best = null;
+  let bestScore = threshold;
+  for (let i = 0; i < index.length; i++) {
+    const score = jaccardTrigram(qTri, trigrams(index[i]));
+    if (score > bestScore) { bestScore = score; best = players[i]; }
+  }
+  return best ? [best] : [];
+}
