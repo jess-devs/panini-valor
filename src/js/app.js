@@ -159,7 +159,9 @@ const $overlay = document.getElementById("overlay");
 const $progress = document.getElementById("progress-bar");
 const $loadMsg = document.getElementById("load-msg");
 const $loadError = document.getElementById("load-error");
-const $searchBox = document.getElementById("search");
+const $searchBox      = document.getElementById("search");
+const $searchClearBtn = document.getElementById("search-clear-btn");
+const $searchScanBtn  = document.querySelector(".search-scanner-btn");
 const $results = document.getElementById("results");
 const $configBtn = document.getElementById("config-btn");
 const $modal = document.getElementById("modal");
@@ -249,9 +251,19 @@ async function init() {
     loadCart(players);
 
     $overlay.classList.add("hidden");
-    $searchBox.focus();
 
     renderCart();
+
+    const qParam = new URLSearchParams(location.search).get("q");
+    if (qParam?.trim()) {
+      $searchBox.value = qParam.trim();
+      syncClearBtn();
+      runQuery();
+      $searchBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      $searchBox.focus();
+    }
+
     await maybeShowDisclaimer();
   } catch (err) {
     $loadMsg.textContent = "";
@@ -312,7 +324,20 @@ function runQuery() {
 }
 
 
-$searchBox.addEventListener("input", runQuery);
+function syncClearBtn() {
+  const hasText = $searchBox.value.length > 0;
+  $searchClearBtn.hidden = !hasText;
+  $searchScanBtn.hidden  = hasText;
+}
+
+$searchBox.addEventListener("input", () => { runQuery(); syncClearBtn(); });
+
+$searchClearBtn.addEventListener("click", () => {
+  $searchBox.value = "";
+  syncClearBtn();
+  runQuery();
+  $searchBox.focus();
+});
 
 function renderResults(found) {
   if (found.length === 0) {

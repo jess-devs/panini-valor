@@ -218,6 +218,68 @@ main {
 
 .search-wrap { position: relative; }
 
+.search-scanner-btn {
+  position: absolute;
+  right: var(--sp-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-ink-faint);
+  text-decoration: none;
+  transition: color 0.18s;
+  flex-shrink: 0;
+}
+
+.search-scanner-btn:hover { color: var(--color-ink-muted); }
+
+.search-scanner-btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.search-scanner-btn[hidden] { display: none; }
+
+.search-clear-btn {
+  position: absolute;
+  right: var(--sp-3);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-ink-faint);
+  cursor: pointer;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.search-clear-btn::before,
+.search-clear-btn::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.search-clear-btn::before { transform: rotate(45deg); }
+.search-clear-btn::after  { transform: rotate(-45deg); }
+
+.search-clear-btn:hover { color: var(--color-danger); }
+.search-clear-btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.search-clear-btn[hidden] { display: none; }
+
 .search-icon {
   position: absolute;
   left: var(--sp-4);
@@ -228,10 +290,12 @@ main {
   transition: color 0.2s;
 }
 
+#search::-webkit-search-cancel-button { -webkit-appearance: none; }
+
 #search {
   width: 100%;
   height: 52px;
-  padding: 0 var(--sp-5) 0 48px;
+  padding: 0 52px 0 48px;
   font-size: var(--text-base);
   font-family: inherit;
   font-weight: 400;

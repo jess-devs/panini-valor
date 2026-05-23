@@ -74,12 +74,19 @@
                         <circle cx="11" cy="11" r="8" />
                         <path d="m21 21-4.35-4.35" />
                     </svg>
-                    <input type="search" id="search" placeholder="Ej: Mbappé, Haaland, Lamine Yamal…" autocomplete="off" spellcheck="false" aria-label="Buscar jugador" />
+                    <input type="search" id="search" placeholder="Mbappé, Haaland, Lamine Yamal…" autocomplete="off" spellcheck="false" aria-label="Buscar jugador" />
+                    <button id="search-clear-btn" class="search-clear-btn" type="button" aria-label="Limpiar búsqueda" hidden></button>
+                    <a href="pages/scanner.html" class="search-scanner-btn" aria-label="Escanear figurita con la cámara" title="Escanear figurita">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                    </a>
                 </div>
                 <div class="filter-row">
                     <button id="filter-trigger" class="filter-trigger-btn" type="button">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-                        <span id="filter-trigger-label">Filtrar por grupo o selección</span>
+                        <span id="filter-trigger-label">Filtrar</span>
                     </button>
                     <button id="filter-chip-clear" class="filter-chip-clear" hidden type="button" aria-label="Limpiar filtro">
                         <span id="filter-chip-text"></span>

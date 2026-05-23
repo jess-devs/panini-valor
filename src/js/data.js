@@ -1,4 +1,4 @@
-export const CSV_URL = "data/players.csv.gz";
+export const CSV_URL = new URL('../data/players.csv.gz', import.meta.url).href;
 
 /**
  * Normaliza el nombre de un país usando el mapa de alias.
