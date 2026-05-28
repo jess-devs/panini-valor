@@ -289,7 +289,7 @@ function runQuery() {
   const query = $searchBox.value.trim();
 
   if (!activeGroup && !activeTeam) {
-    if (query.length < 2) { $results.innerHTML = ""; return; }
+    if (query.length < 2) { $results.innerHTML = ""; $searchResetBtn.hidden = true; return; }
     renderResults(search(query, activeIndex, activePool));
     return;
   }
@@ -339,7 +339,17 @@ $searchClearBtn.addEventListener("click", () => {
   $searchBox.focus();
 });
 
+const $searchResetBtn = document.getElementById("search-reset-btn");
+
+$searchResetBtn.addEventListener("click", () => {
+  $searchBox.value = "";
+  syncClearBtn();
+  runQuery();
+  $searchBox.focus();
+});
+
 function renderResults(found) {
+  $searchResetBtn.hidden = found.length === 0;
   if (found.length === 0) {
     $results.innerHTML = `<p class="empty-msg">${
       activeTeam || activeGroup

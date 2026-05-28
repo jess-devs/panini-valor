@@ -371,6 +371,19 @@ main {
   outline-offset: 2px;
 }
 
+#search-reset-btn {
+  color: #f87171;
+  border-color: #fecaca;
+}
+
+#search-reset-btn:hover {
+  background: #fff1f2;
+  border-color: #fca5a5;
+  color: #ef4444;
+}
+
+#search-reset-btn[hidden] { display: none; }
+
 .filter-chip-clear {
   display: inline-flex;
   align-items: center;

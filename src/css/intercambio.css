@@ -3,34 +3,11 @@
    Dialog de cruce de listas de figuritas
 ═══════════════════════════════════════════════ */
 
-/* ── Header button ───────────────────────────── */
-#intercambio-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 0 var(--sp-4);
-  height: 36px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-ink-muted);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
+/* ── Intercambio button (filter-row) ─────────── */
 #intercambio-btn:hover {
-  background: var(--color-gold-bg);
-  border-color: var(--color-gold-border);
-  color: var(--color-gold-dim);
-}
-
-#intercambio-btn:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
+  background: var(--color-gold-bg) !important;
+  border-color: var(--color-gold-border) !important;
+  color: var(--color-gold-dim) !important;
 }
 
 /* ── Dialog ──────────────────────────────────── */
@@ -471,16 +448,6 @@
 
 /* ── Mobile overrides ────────────────────────── */
 @media (max-width: 640px) {
-  #intercambio-btn span { display: none; }
-
-  #intercambio-btn {
-    padding: 0;
-    width: 44px;
-    height: 44px;
-    justify-content: center;
-    border-radius: 50%;
-  }
-
   .ix-dialog {
     width: 100vw;
     max-width: 100vw;
