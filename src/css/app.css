@@ -721,7 +721,6 @@ main {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
 }
 
 .cart-header {
