@@ -333,11 +333,25 @@ function syncClearBtn() {
 
 $searchBox.addEventListener("input", () => { runQuery(); syncClearBtn(); });
 
+function animateCardsOut(onComplete) {
+  const cards = [...$results.querySelectorAll(".card")];
+  if (!cards.length) { onComplete(); return; }
+  gsap.to(cards, {
+    opacity: 0, y: -10, scale: 0.94,
+    duration: 0.18,
+    stagger: { each: 0.025, from: "start" },
+    ease: "power2.in",
+    onComplete,
+  });
+}
+
 $searchClearBtn.addEventListener("click", () => {
-  $searchBox.value = "";
-  syncClearBtn();
-  runQuery();
-  $searchBox.focus();
+  animateCardsOut(() => {
+    $searchBox.value = "";
+    syncClearBtn();
+    runQuery();
+    $searchBox.focus();
+  });
 });
 
 const $searchResetBtn = document.getElementById("search-reset-btn");
@@ -382,10 +396,12 @@ function animateFilterBtnsIn() {
 });
 
 $searchResetBtn.addEventListener("click", () => {
-  $searchBox.value = "";
-  syncClearBtn();
-  runQuery();
-  $searchBox.focus();
+  animateCardsOut(() => {
+    $searchBox.value = "";
+    syncClearBtn();
+    runQuery();
+    $searchBox.focus();
+  });
 });
 
 function renderResults(found) {

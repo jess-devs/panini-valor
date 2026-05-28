@@ -805,6 +805,17 @@ main {
 #cart-section.cart--empty .cart-empty-state  { display: flex; }
 #cart-section.cart--empty .cart-table-wrap   { display: none; }
 
+.cart-empty-svg {
+  animation: cartFloat 3.6s ease-in-out infinite;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+@keyframes cartFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
+
 .cart-table-wrap { overflow-x: auto; }
 
 .cart-table {
