@@ -251,28 +251,42 @@
 }
 
 /* ── Step 2: results ─────────────────────────── */
+.ix-results-single {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sp-4) var(--sp-6);
+}
+
 .ix-result-panel {
   display: flex;
   flex-direction: column;
   gap: var(--sp-3);
 }
 
-.ix-result-panel[hidden] { display: none !important; }
-
-/* When only one panel visible, span full grid width */
-.ix-grid--single .ix-result-panel {
-  grid-column: 1 / -1;
-}
-
 .ix-result-heading {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
+  width: 100%;
   font-size: var(--text-sm);
   font-weight: 700;
+  font-family: inherit;
   color: var(--color-ink);
   padding-bottom: var(--sp-3);
+  border: none;
   border-bottom: 1px solid var(--color-border-sub);
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ix-result-heading:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .ix-dot {
@@ -283,12 +297,37 @@
 }
 
 .ix-dot--green { background: var(--color-success); }
-.ix-dot--blue  { background: #3b82f6; }
 
+/* Chevron rotates when panel is collapsed */
+.ix-chevron {
+  flex-shrink: 0;
+  color: var(--color-ink-faint);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ix-result-panel.collapsed .ix-chevron {
+  transform: rotate(-90deg);
+}
+
+/* Grid trick: animates from full height to 0 without JS measurements */
 .ix-results-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ix-result-panel.collapsed .ix-results-body {
+  grid-template-rows: 0fr;
+}
+
+/* Inner wrapper required for the grid collapse trick */
+.ix-results-inner {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: 0;
+  padding-top: var(--sp-2);
 }
 
 /* Compact row: flag + code + chips all inline */
@@ -341,11 +380,37 @@
   line-height: 1.7;
 }
 
-.ix-empty {
+.ix-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-4) var(--sp-2);
+  animation: ix-empty-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.ix-empty-svg {
+  animation: ix-float 3.4s ease-in-out infinite;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.ix-empty-msg {
   font-size: var(--text-sm);
   color: var(--color-ink-faint);
-  font-style: italic;
-  padding: var(--sp-3) 0;
+  text-align: center;
+  line-height: 1.5;
+  max-width: 200px;
+}
+
+@keyframes ix-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes ix-empty-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
 }
 
 /* ── Total count badge ───────────────────────── */

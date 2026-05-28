@@ -2,45 +2,68 @@ import { openDialog, closeDialog } from "./transitions.js";
 import { TEAM_COUNTRY, TEAM_DISPLAY } from "./checklist.js";
 import { getISO } from "./data.js";
 
+/** Códigos de equipo válidos para el allowlist del parser */
+const KNOWN_TEAMS = new Set([...Object.keys(TEAM_COUNTRY), "FWC", "CC"]);
+
+function addToMap(map, code, num) {
+  if (!map.has(code)) map.set(code, new Set());
+  map.get(code).add(num);
+}
+
 /**
- * Parsea el texto exportado de figuritas.app.
- * Detecta secciones "Repetidas" y "Me faltan" automáticamente.
+ * Parser universal: acepta cualquier formato de export o texto a mano.
+ *
+ * Formatos soportados:
+ *   - A mano:         "Mar17", "Par13", "Cod11"
+ *   - Otra app:       "🇿🇦 Sudáfrica (1): RSA6" / "🏆 FWC: FWC1, FWC2"
+ *   - figuritas.app:  "MEX 🇲🇽: 7, 12, 13"
+ *   - Sin emojis:     cualquiera de las anteriores sin emoji
+ *
+ * Estrategia 1 (prioridad): busca tokens TEAM+NUM en la línea
+ * Estrategia 2 (fallback): patrón "TEAM [texto]: num, num"
+ *
  * @param {string} text
  * @returns {{ repetidas: Map<string, Set<number>>, me_faltan: Map<string, Set<number>> }}
  */
 function parseFullList(text) {
   const repetidas = new Map();
   const me_faltan = new Map();
-  let currentMap = null;
-
-  const SECTION_RE = /^(repetidas|me falt[aá]n?)$/i;
-  // Matches lines like: "MEX 🇲🇽: 7, 12, 13" or "FWC 📜: 10, 11"
-  const STICKER_RE = /^([A-Z]{2,5}[^:\n]*?):\s*([\d,\s]+)$/u;
+  let current = null;
 
   for (const rawLine of text.split("\n")) {
     const line = rawLine.trim();
     if (!line) continue;
+    if (line.startsWith("http") || line.startsWith("─") || line.startsWith("—")) continue;
 
-    if (SECTION_RE.test(line)) {
-      currentMap = /repetidas/i.test(line) ? repetidas : me_faltan;
-      continue;
+    if (line.length < 60) {
+      if (/repetidas/i.test(line)) { current = repetidas; continue; }
+      if (/me\s*falt[aá]/i.test(line)) { current = me_faltan; continue; }
+    }
+    if (!current) current = repetidas;
+
+    const re1 = /\b([A-Za-z]{2,5})(\d{1,2})\b/g;
+    let m;
+    let found = false;
+    while ((m = re1.exec(line)) !== null) {
+      const code = m[1].toUpperCase();
+      if (!KNOWN_TEAMS.has(code)) continue;
+      addToMap(current, code, parseInt(m[2], 10));
+      found = true;
     }
 
-    const m = line.match(STICKER_RE);
-    if (!m) continue;
-
-    // If no section header detected yet, default to repetidas
-    if (!currentMap) currentMap = repetidas;
-
-    const key = m[1].trim();
-    const nums = m[2]
-      .split(",")
-      .map((s) => parseInt(s.trim(), 10))
-      .filter((n) => Number.isFinite(n) && n > 0);
-
-    if (!nums.length) continue;
-    if (!currentMap.has(key)) currentMap.set(key, new Set());
-    for (const n of nums) currentMap.get(key).add(n);
+    if (!found) {
+      const m2 = line.match(/^([A-Za-z]{2,5})[^:\n]{0,30}:\s*([\d][,\d\s]*)$/u);
+      if (m2) {
+        const code = m2[1].toUpperCase();
+        if (KNOWN_TEAMS.has(code)) {
+          const nums = m2[2]
+            .split(",")
+            .map((s) => parseInt(s.trim(), 10))
+            .filter((n) => Number.isFinite(n) && n > 0);
+          for (const n of nums) addToMap(current, code, n);
+        }
+      }
+    }
   }
 
   return { repetidas, me_faltan };
@@ -48,8 +71,8 @@ function parseFullList(text) {
 
 /**
  * Cruza las figuritas que el dador tiene de más con las que el receptor necesita.
- * @param {Map<string, Set<number>>} giver  - repetidas del dador
- * @param {Map<string, Set<number>>} receiver - me_faltan del receptor
+ * @param {Map<string, Set<number>>} giver
+ * @param {Map<string, Set<number>>} receiver
  * @returns {{ key: string, numbers: number[] }[]}
  */
 function findMatches(giver, receiver) {
@@ -74,50 +97,62 @@ function flagHtml(teamCode) {
 }
 
 /**
- * Renderiza las secciones de resultados dentro de un contenedor DOM.
+ * Renderiza los resultados dentro de un contenedor DOM.
  * @param {HTMLElement} container
  * @param {{ key: string, numbers: number[] }[]} matches
  * @param {string} emptyMsg
  */
 function renderMatches(container, matches, emptyMsg) {
-  if (!matches.length) {
-    container.innerHTML = `<p class="ix-empty">${emptyMsg}</p>`;
-    return;
-  }
-  container.innerHTML = matches
-    .map(({ key, numbers }) => {
-      const code = key.split(" ")[0]; // "KOR" from "KOR 🇰🇷"
-      const flag = flagHtml(code);
-      const label = TEAM_DISPLAY[code] || code;
-      return `
+  const inner = matches.length
+    ? `<div class="ix-results-inner">${matches.map(({ key, numbers }) => {
+        const flag = flagHtml(key);
+        const label = TEAM_DISPLAY[key] || key;
+        return `
     <div class="ix-results-section">
-      <span class="ix-team-info" title="${label}">${flag}<span class="ix-team-code">${code}</span></span>
+      <span class="ix-team-info" title="${label}">${flag}<span class="ix-team-code">${key}</span></span>
       <div class="ix-chips">
         ${numbers.map((n) => `<span class="ix-chip">${n}</span>`).join("")}
       </div>
     </div>`;
-    })
-    .join("");
+      }).join("")}</div>`
+    : `<div class="ix-results-inner">
+      <div class="ix-empty-state">
+        <svg class="ix-empty-svg" width="96" height="68" viewBox="0 0 96 68" fill="none" aria-hidden="true">
+          <g transform="rotate(-8 22 30)">
+            <rect x="2" y="6" width="38" height="50" rx="5" fill="#fffbf0" stroke="#fde68a" stroke-width="1.5"/>
+            <rect x="8" y="13" width="26" height="20" rx="3" fill="#fde68a" opacity="0.55"/>
+            <rect x="8" y="38" width="26" height="2.5" rx="1.25" fill="#e8a020" opacity="0.25"/>
+            <rect x="11" y="43" width="20" height="2" rx="1" fill="#e8a020" opacity="0.15"/>
+          </g>
+          <g transform="rotate(8 74 30)">
+            <rect x="56" y="6" width="38" height="50" rx="5" fill="#fffbf0" stroke="#fde68a" stroke-width="1.5"/>
+            <rect x="62" y="13" width="26" height="20" rx="3" fill="#fde68a" opacity="0.55"/>
+            <rect x="62" y="38" width="26" height="2.5" rx="1.25" fill="#e8a020" opacity="0.25"/>
+            <rect x="65" y="43" width="20" height="2" rx="1" fill="#e8a020" opacity="0.15"/>
+          </g>
+          <circle cx="48" cy="34" r="11" fill="#f2f2f4" stroke="#e4e4e7" stroke-width="1.5"/>
+          <text x="48" y="34" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="700" fill="#aeaeb2" font-family="system-ui,sans-serif">?</text>
+        </svg>
+        <p class="ix-empty-msg">${emptyMsg}</p>
+      </div>
+    </div>`;
+
+  container.innerHTML = inner;
 }
 
 /**
  * Genera el texto plano para copiar al portapapeles.
+ * @param {{ key: string, numbers: number[] }[]} result
  */
-function buildCopyText(iGive, theyGive) {
+function buildCopyText(result) {
   const lines = ["Intercambio de figuritas — Panini Valor", "https://jess-devs.github.io/panini-valor/", ""];
-  if (iGive.length) {
-    lines.push("Yo le puedo dar a mi amigo:");
-    for (const { key, numbers } of iGive) {
+  if (result.length) {
+    lines.push("Tu amigo te puede dar:");
+    for (const { key, numbers } of result) {
       lines.push(`  ${key}: ${numbers.join(", ")}`);
     }
   } else {
-    lines.push("No hay figuritas para darle a tu amigo.");
-  }
-  if (theyGive.length) {
-    lines.push("", "Mi amigo me puede dar:");
-    for (const { key, numbers } of theyGive) {
-      lines.push(`  ${key}: ${numbers.join(", ")}`);
-    }
+    lines.push("Tu amigo no tiene figuritas que te sirvan.");
   }
   return lines.join("\n");
 }
@@ -127,8 +162,7 @@ function countTotal(matches) {
   return matches.reduce((sum, { numbers }) => sum + numbers.length, 0);
 }
 
-let lastIGive = [];
-let lastTheyGive = [];
+let lastResult = [];
 
 export function initIntercambio() {
   const dialog = /** @type {HTMLDialogElement} */ (
@@ -143,24 +177,26 @@ export function initIntercambio() {
   const copyBtn = document.getElementById("ix-copy-btn");
   const viewInput = document.getElementById("ix-view-input");
   const viewResults = document.getElementById("ix-view-results");
-  const resultsGrid = viewResults.querySelector(".ix-grid");
   const myTa = /** @type {HTMLTextAreaElement} */ (
     document.getElementById("ix-my-ta")
   );
   const friendTa = /** @type {HTMLTextAreaElement} */ (
     document.getElementById("ix-friend-ta")
   );
-  const iGiveContainer = document.getElementById("ix-i-give");
-  const theyGiveContainer = document.getElementById("ix-they-give");
-  const theyGivePanel = document.getElementById("ix-they-give-panel");
-  const iGiveBadge = document.getElementById("ix-i-give-badge");
-  const theyGiveBadge = document.getElementById("ix-they-give-badge");
+  const resultBody = document.getElementById("ix-result-body");
+  const resultBadge = document.getElementById("ix-result-badge");
+  const resultPanel = resultBody.closest(".ix-result-panel");
+
+  // Collapse toggle
+  const resultHeading = resultPanel.querySelector(".ix-result-heading");
+  resultHeading.addEventListener("click", () => {
+    const collapsed = resultPanel.classList.toggle("collapsed");
+    resultHeading.setAttribute("aria-expanded", String(!collapsed));
+  });
 
   openBtn.addEventListener("click", () => openDialog(dialog));
-
   closeBtn.addEventListener("click", () => closeDialog(dialog));
 
-  // Close on backdrop click
   dialog.addEventListener("click", (e) => {
     if (e.target === dialog) closeDialog(dialog);
   });
@@ -170,38 +206,22 @@ export function initIntercambio() {
     const myList = parseFullList(myTa.value);
     const friendList = parseFullList(friendTa.value);
 
-    lastIGive = findMatches(myList.repetidas, friendList.me_faltan);
-    lastTheyGive = findMatches(friendList.repetidas, myList.me_faltan);
+    // Izquierda = lo que me falta; derecha = repetidas del amigo.
+    // Si no hay sección explícita, usar lo que se parseó en el único mapa no vacío.
+    const myNeeds = myList.me_faltan.size > 0 ? myList.me_faltan : myList.repetidas;
+    const friendExtras = friendList.repetidas.size > 0 ? friendList.repetidas : friendList.me_faltan;
 
-    renderMatches(
-      iGiveContainer,
-      lastIGive,
-      "No hay figuritas en común que le puedas dar.",
-    );
+    lastResult = findMatches(friendExtras, myNeeds);
 
-    // Show "they give me" panel only if friend provided a "Repetidas" section
-    const friendHasRepetidas = friendList.repetidas.size > 0;
-    theyGivePanel.hidden = !friendHasRepetidas;
-    resultsGrid.classList.toggle("ix-grid--single", !friendHasRepetidas);
+    renderMatches(resultBody, lastResult, "Tu amigo no tiene figuritas que te sirvan.");
 
-    if (friendHasRepetidas) {
-      renderMatches(
-        theyGiveContainer,
-        lastTheyGive,
-        "Tu amigo no tiene repetidas que te sirvan.",
-      );
-      const theyTotal = countTotal(lastTheyGive);
-      theyGiveBadge.textContent = theyTotal
-        ? `${theyTotal} figurita${theyTotal !== 1 ? "s" : ""}`
-        : "";
-      theyGiveBadge.hidden = theyTotal === 0;
-    }
+    const total = countTotal(lastResult);
+    resultBadge.textContent = total ? `${total} figurita${total !== 1 ? "s" : ""}` : "";
+    resultBadge.hidden = total === 0;
 
-    const iTotal = countTotal(lastIGive);
-    iGiveBadge.textContent = iTotal
-      ? `${iTotal} figurita${iTotal !== 1 ? "s" : ""}`
-      : "";
-    iGiveBadge.hidden = iTotal === 0;
+    // Reset collapse state
+    resultPanel.classList.remove("collapsed");
+    resultHeading.setAttribute("aria-expanded", "true");
 
     viewInput.hidden = true;
     viewResults.hidden = false;
@@ -213,7 +233,7 @@ export function initIntercambio() {
   });
 
   copyBtn.addEventListener("click", () => {
-    const text = buildCopyText(lastIGive, lastTheyGive);
+    const text = buildCopyText(lastResult);
     const orig = copyBtn.textContent;
 
     // Append inside the dialog to preserve focus context
@@ -237,7 +257,6 @@ export function initIntercambio() {
     dialog.removeChild(ta);
 
     if (!ok) {
-      // Modern API as last resort (requires HTTPS or localhost)
       navigator.clipboard?.writeText(text).catch(() => {});
     }
 
@@ -247,11 +266,9 @@ export function initIntercambio() {
     }, 2000);
   });
 
-  // Reset views when dialog closes
   dialog.addEventListener("close", () => {
     viewInput.hidden = false;
     viewResults.hidden = true;
-    lastIGive = [];
-    lastTheyGive = [];
+    lastResult = [];
   });
 }
