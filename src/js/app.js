@@ -894,4 +894,15 @@ $filterDialog.addEventListener("click", (e) => {
   if (groupCard && !$filterGroupsView.hidden) showTeamsView(groupCard.dataset.group);
 });
 
+// Recibe los códigos de figurita desde el modal de intercambio y los muestra como resultados.
+document.addEventListener("intercambio:lookup", (e) => {
+  const codes = new Set(e.detail);
+  clearFilter();
+  $searchBox.value = "";
+  syncClearBtn();
+  const matched = players.filter((p) => p.sticker_code && codes.has(p.sticker_code));
+  renderResults(matched);
+  $results.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 init();

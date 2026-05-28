@@ -186,6 +186,7 @@ export function initIntercambio() {
   const resultBody = document.getElementById("ix-result-body");
   const resultBadge = document.getElementById("ix-result-badge");
   const resultPanel = resultBody.closest(".ix-result-panel");
+  const pricesBtn = document.getElementById("ix-prices-btn");
 
   // Collapse toggle
   const resultHeading = resultPanel.querySelector(".ix-result-heading");
@@ -223,6 +224,9 @@ export function initIntercambio() {
     resultPanel.classList.remove("collapsed");
     resultHeading.setAttribute("aria-expanded", "true");
 
+    // Show "Ver precios" only when there are matches
+    pricesBtn.hidden = lastResult.length === 0;
+
     viewInput.hidden = true;
     viewResults.hidden = false;
   });
@@ -230,6 +234,12 @@ export function initIntercambio() {
   backBtn.addEventListener("click", () => {
     viewResults.hidden = true;
     viewInput.hidden = false;
+  });
+
+  pricesBtn.addEventListener("click", () => {
+    const codes = lastResult.flatMap(({ key, numbers }) => numbers.map((n) => `${key}${n}`));
+    document.dispatchEvent(new CustomEvent("intercambio:lookup", { detail: codes }));
+    closeDialog(dialog);
   });
 
   copyBtn.addEventListener("click", () => {
