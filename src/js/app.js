@@ -114,7 +114,7 @@ function addToCart(playerId) {
   if (!p) return;
   cart.push(p);
   saveCart();
-  renderCart();
+  renderCart(id);
   const btn = document.querySelector(`[data-add-id="${id}"]`);
   if (btn) {
     setAdded(btn);
@@ -135,23 +135,22 @@ function addToCart(playerId) {
 function removeFromCart(playerId) {
   const id = String(playerId);
   const row = $cartBody.querySelector(`[data-del-id="${id}"]`)?.closest("tr");
-  if (row) {
-    row.classList.add("cart-row-out");
-    setTimeout(() => {
-      cart = cart.filter((p) => String(p.player_id) !== id);
-      clearPlayerState(id);
-      saveCart();
-      renderCart();
-      const btn = document.querySelector(`[data-add-id="${id}"]`);
-      if (btn) setNotAdded(btn);
-    }, 220);
-  } else {
+  const doRemove = () => {
     cart = cart.filter((p) => String(p.player_id) !== id);
     clearPlayerState(id);
     saveCart();
     renderCart();
     const btn = document.querySelector(`[data-add-id="${id}"]`);
     if (btn) setNotAdded(btn);
+  };
+  if (row) {
+    gsap.to(row, {
+      opacity: 0, x: 18, scaleY: 0.6,
+      duration: 0.22, ease: "power2.in",
+      onComplete: doRemove,
+    });
+  } else {
+    doRemove();
   }
 }
 
@@ -160,7 +159,6 @@ const $progress = document.getElementById("progress-bar");
 const $loadMsg = document.getElementById("load-msg");
 const $loadError = document.getElementById("load-error");
 const $searchBox      = document.getElementById("search");
-const $searchClearBtn = document.getElementById("search-clear-btn");
 const $searchScanBtn  = document.querySelector(".search-scanner-btn");
 const $results = document.getElementById("results");
 const $configBtn = document.getElementById("config-btn");
@@ -251,6 +249,7 @@ async function init() {
     loadCart(players);
 
     $overlay.classList.add("hidden");
+    animateFilterBtnsIn();
 
     renderCart();
 
@@ -289,7 +288,7 @@ function runQuery() {
   const query = $searchBox.value.trim();
 
   if (!activeGroup && !activeTeam) {
-    if (query.length < 2) { $results.innerHTML = ""; $searchResetBtn.hidden = true; return; }
+    if (query.length < 2) { $results.innerHTML = ""; hideResetBtn(); return; }
     renderResults(search(query, activeIndex, activePool));
     return;
   }
@@ -325,21 +324,51 @@ function runQuery() {
 
 
 function syncClearBtn() {
-  const hasText = $searchBox.value.length > 0;
-  $searchClearBtn.hidden = !hasText;
-  $searchScanBtn.hidden  = hasText;
+  $searchScanBtn.hidden = $searchBox.value.length > 0;
 }
 
 $searchBox.addEventListener("input", () => { runQuery(); syncClearBtn(); });
 
-$searchClearBtn.addEventListener("click", () => {
-  $searchBox.value = "";
-  syncClearBtn();
-  runQuery();
-  $searchBox.focus();
-});
-
 const $searchResetBtn = document.getElementById("search-reset-btn");
+
+function showResetBtn() {
+  if (!$searchResetBtn.hidden) return;
+  $searchResetBtn.hidden = false;
+  gsap.fromTo($searchResetBtn,
+    { opacity: 0, scale: 0.75, x: -8 },
+    { opacity: 1, scale: 1, x: 0, duration: 0.28, ease: "back.out(2)" }
+  );
+}
+
+function hideResetBtn() {
+  if ($searchResetBtn.hidden) return;
+  gsap.to($searchResetBtn, {
+    opacity: 0, scale: 0.8, x: -6,
+    duration: 0.18, ease: "power2.in",
+    onComplete: () => { $searchResetBtn.hidden = true; }
+  });
+}
+
+function animateFilterBtnsIn() {
+  gsap.from(["#filter-trigger", "#intercambio-btn"], {
+    y: -10, opacity: 0, scale: 0.88,
+    duration: 0.42, stagger: 0.09,
+    ease: "back.out(1.8)", clearProps: "all"
+  });
+  gsap.from("#cart-section", {
+    y: 24, opacity: 0, scale: 0.97,
+    duration: 0.55, delay: 0.18,
+    ease: "power3.out", clearProps: "all"
+  });
+}
+
+/* Press feedback on all filter-row buttons */
+["#filter-trigger", "#intercambio-btn", "#search-reset-btn"].forEach((sel) => {
+  const el = document.querySelector(sel);
+  el.addEventListener("pointerdown", () => gsap.to(el, { scale: 0.91, duration: 0.08, ease: "power2.in" }));
+  el.addEventListener("pointerup",   () => gsap.to(el, { scale: 1, duration: 0.25, ease: "back.out(2.5)" }));
+  el.addEventListener("pointerleave",() => gsap.to(el, { scale: 1, duration: 0.18 }));
+});
 
 $searchResetBtn.addEventListener("click", () => {
   $searchBox.value = "";
@@ -349,7 +378,7 @@ $searchResetBtn.addEventListener("click", () => {
 });
 
 function renderResults(found) {
-  $searchResetBtn.hidden = found.length === 0;
+  found.length === 0 ? hideResetBtn() : showResetBtn();
   if (found.length === 0) {
     $results.innerHTML = `<p class="empty-msg">${
       activeTeam || activeGroup
@@ -473,13 +502,16 @@ $results.addEventListener("click", (e) => {
 /**
  * Re-renderiza la sección del carrito con los jugadores actuales y el subtotal.
  */
-function renderCart() {
+function renderCart(newId = null) {
+  const prevCount = parseInt($cartCount.textContent, 10) || 0;
   $cartCount.textContent = cart.length;
+  if (cart.length !== prevCount) animateCartBadge();
 
   if (!cart.length) {
     $cartSection.classList.add("cart--empty");
     $cartTotal.textContent = "—";
     if ($cartBar) $cartBar.classList.remove("cart-bar--visible");
+    requestAnimationFrame(() => animateCartEmptyIn());
     return;
   }
 
@@ -576,12 +608,39 @@ function renderCart() {
 
   $cartTotal.textContent = formatCRC(subtotal);
 
+  if (newId) {
+    const newRow = $cartBody.querySelector(`[data-price-row="${newId}"]`);
+    if (newRow) {
+      gsap.from(newRow, {
+        opacity: 0, x: 20, scale: 0.97,
+        duration: 0.34, ease: "back.out(1.6)",
+        clearProps: "all",
+      });
+    }
+  }
+
   if ($cartBar) {
     const count = cart.length;
     $cartBar.classList.add("cart-bar--visible");
     $cartBarCount.textContent = `${count} postal${count !== 1 ? "es" : ""}`;
     $cartBarTotal.textContent = formatCRC(subtotal);
   }
+}
+
+function animateCartBadge() {
+  gsap.fromTo($cartCount,
+    { scale: 1.5, opacity: 0.6 },
+    { scale: 1, opacity: 1, duration: 0.38, ease: "back.out(2.8)" }
+  );
+}
+
+function animateCartEmptyIn() {
+  const el = document.getElementById("cart-empty-state");
+  if (!el || el.style.display === "none") return;
+  gsap.from(el, {
+    opacity: 0, y: 14, scale: 0.93,
+    duration: 0.44, ease: "back.out(1.7)",
+  });
 }
 
 $cartBody.addEventListener("click", (e) => {
