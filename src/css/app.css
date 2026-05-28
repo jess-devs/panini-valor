@@ -721,6 +721,7 @@ main {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 
 .cart-header {
@@ -1034,9 +1035,7 @@ main {
 }
 
 .sort-popover {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
+  position: fixed;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);

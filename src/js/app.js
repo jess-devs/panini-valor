@@ -856,6 +856,13 @@ function getSortedCart() {
 
 $cartSortBtn.addEventListener("click", (e) => {
   e.stopPropagation();
+  const isHidden = $sortPopover.classList.contains("hidden");
+  if (isHidden) {
+    const r = $cartSortBtn.getBoundingClientRect();
+    $sortPopover.style.top = `${r.bottom + 6}px`;
+    $sortPopover.style.right = `${window.innerWidth - r.right}px`;
+    $sortPopover.style.left = "auto";
+  }
   $sortPopover.classList.toggle("hidden");
 });
 
