@@ -323,11 +323,22 @@ function runQuery() {
 }
 
 
+const $searchClearBtn = document.getElementById("search-clear-btn");
+
 function syncClearBtn() {
-  $searchScanBtn.hidden = $searchBox.value.length > 0;
+  const hasText = $searchBox.value.length > 0;
+  $searchScanBtn.hidden = hasText;
+  $searchClearBtn.hidden = !hasText;
 }
 
 $searchBox.addEventListener("input", () => { runQuery(); syncClearBtn(); });
+
+$searchClearBtn.addEventListener("click", () => {
+  $searchBox.value = "";
+  syncClearBtn();
+  runQuery();
+  $searchBox.focus();
+});
 
 const $searchResetBtn = document.getElementById("search-reset-btn");
 

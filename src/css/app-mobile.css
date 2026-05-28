@@ -46,6 +46,9 @@
 
   .search-icon { left: var(--sp-3); }
 
+  .search-clear-btn { display: flex; }
+  #search-reset-btn { display: none !important; }
+
   .filter-row {
     flex-direction: row;
     gap: var(--sp-2);
