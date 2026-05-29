@@ -237,10 +237,13 @@ function removeFromCart(playerId) {
   }
 }
 
-const $overlay = document.getElementById("overlay");
-const $progress = document.getElementById("progress-bar");
-const $loadMsg = document.getElementById("load-msg");
+const $overlay  = document.getElementById("overlay");
+const $loadMsg  = document.getElementById("load-msg");
 const $loadError = document.getElementById("load-error");
+const $loaderPct = document.getElementById("loader-pct");
+
+const _LOADER_CIRC = 2 * Math.PI * 52; // stroke-dasharray del anillo SVG
+const _loaderPct = { val: 0 };
 const $searchBox      = document.getElementById("search");
 const $searchScanBtn  = document.querySelector(".search-scanner-btn");
 const $results = document.getElementById("results");
@@ -312,6 +315,15 @@ function hideSkeletons() {
   $results.innerHTML = "";
 }
 
+function initLoader() {
+  // Anillo aparece escalando desde el centro
+  gsap.from(".loader-ring", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(1.4)" });
+  // Balón hace pop-in con spin — aparece directo en su posición
+  gsap.from("#loader-ball", { scale: 0, rotation: -200, duration: 0.55, ease: "back.out(2.5)", delay: 0.18 });
+  // Porcentaje y mensaje aparecen suavemente
+  gsap.from(["#loader-pct", ".loader-msg"], { opacity: 0, y: 6, duration: 0.38, stagger: 0.08, delay: 0.32 });
+}
+
 /**
  * Descarga el catálogo, inicializa el índice de búsqueda y el carrito,
  * luego muestra el disclaimer si es la primera visita.
@@ -319,8 +331,17 @@ function hideSkeletons() {
 async function init() {
   try {
     players = await downloadAndParse((pct) => {
-      $progress.style.width = pct * 100 + "%";
-      if (pct >= 1) $loadMsg.textContent = "Procesando jugadores…";
+      const ringFill = document.getElementById("loader-ring-fill");
+      gsap.to(ringFill, { strokeDashoffset: _LOADER_CIRC * (1 - pct), duration: 0.35, ease: "power1.out", overwrite: true });
+      gsap.to(_loaderPct, {
+        val: Math.round(pct * 100),
+        duration: 0.35, ease: "none", overwrite: true,
+        onUpdate: () => { if ($loaderPct) $loaderPct.textContent = Math.round(_loaderPct.val) + "%"; },
+      });
+      if (pct < 0.15)      $loadMsg.textContent = "Conectando…";
+      else if (pct < 0.5)  $loadMsg.textContent = "Descargando jugadores…";
+      else if (pct < 0.9)  $loadMsg.textContent = "Procesando datos…";
+      else                 $loadMsg.textContent = "Casi listo…";
     });
     const globalCodeMap = buildChecklistMap(null, null);
     players = players.map((p) => {
@@ -334,8 +355,12 @@ async function init() {
     activeIndex = searchIndex;
     loadCart(players);
 
-    $overlay.classList.add("hidden");
-    animateFilterBtnsIn();
+    gsap.timeline({
+      onComplete: () => { $overlay.classList.add("hidden"); animateFilterBtnsIn(); },
+    })
+      .to("#loader-ball",  { rotation: "+=360", scale: 0, duration: 0.42, ease: "back.in(2)" })
+      .to(".loader-stage", { scale: 0.94, opacity: 0, duration: 0.28, ease: "power2.in" }, "-=0.18")
+      .to($overlay,        { opacity: 0, duration: 0.28 }, "-=0.08");
 
     renderCart();
 
@@ -1191,4 +1216,5 @@ document.addEventListener("intercambio:price-request", (e) => {
   document.dispatchEvent(new CustomEvent("intercambio:price-response", { detail: formatCRC(total) }));
 });
 
+initLoader();
 init();
