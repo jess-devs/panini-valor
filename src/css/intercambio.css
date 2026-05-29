@@ -180,36 +180,65 @@
   flex-shrink: 0;
 }
 
-/* Results footer: stacks the prices button above the action row */
+/* Results footer: single row with back on left, actions on right */
 .ix-footer--results {
-  flex-direction: column;
-  align-items: stretch;
+  justify-content: space-between;
+}
+
+.ix-footer-right {
+  display: flex;
+  align-items: center;
   gap: var(--sp-2);
 }
 
-.ix-footer-row {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-}
-
 .ix-total-chip {
-  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 var(--sp-4);
+  background: var(--color-gold-bg);
+  border: 1.5px solid var(--color-gold-border);
+  border-radius: var(--radius-full);
   font-size: var(--text-sm);
   font-weight: 700;
-  color: var(--color-primary);
+  color: #92400e;
   white-space: nowrap;
   letter-spacing: -0.01em;
 }
 
-/* "Ver precios" button — gold accent matching the sticker identity */
+/* Secondary button (Copiar resultado) */
+.ix-btn-secondary {
+  height: 42px;
+  padding: 0 var(--sp-5);
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.ix-btn-secondary:hover {
+  border-color: var(--color-ink-muted);
+  color: var(--color-ink);
+}
+
+.ix-btn-secondary:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* "Agregar a mi lista" — gold accent CTA */
 .ix-btn-prices {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--sp-2);
-  height: 40px;
-  width: 100%;
+  height: 42px;
+  padding: 0 var(--sp-5);
   background: var(--color-gold-bg);
   border: 1.5px solid var(--color-gold-border);
   border-radius: var(--radius-sm);
@@ -496,8 +525,8 @@
     gap: var(--sp-2);
   }
 
-  .ix-footer-row .ix-btn-primary { flex: 1; justify-content: center; }
-  .ix-footer-row .ix-btn-ghost   { flex: 1; justify-content: center; }
+  .ix-footer--results { flex-wrap: wrap; gap: var(--sp-2); }
+  .ix-footer-right { flex: 1; justify-content: flex-end; flex-wrap: wrap; }
 
   .ix-result-heading { font-size: var(--text-xs); }
 }
