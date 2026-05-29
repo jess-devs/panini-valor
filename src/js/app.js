@@ -575,11 +575,15 @@ function specialCardHTML(p, added) {
     : "";
   const badgeLabel = p._special === "escudo" ? "FOIL" : "Selección";
 
+  const flagAvatar = iso
+    ? `<div class="player-flag-lg"><span class="fi fi-${iso}"></span></div>`
+    : `<div class="player-placeholder player-placeholder--special">${p._special === "escudo" ? ICON.shield : ICON.users}</div>`;
+
   return `
   <div class="card card--special">
     <span class="sticker-code">${p.sticker_code}</span>
     <div class="player-photo-wrap">
-      <div class="player-placeholder player-placeholder--special">${p._special === "escudo" ? ICON.shield : ICON.users}</div>
+      ${flagAvatar}
       ${dot}
     </div>
     <div class="card-body">
@@ -671,11 +675,15 @@ function renderCart(newId = null) {
       const iso = getISO(p.country_of_citizenship);
       const imgSrc = p.image_url || "";
 
-      const av = imgSrc
-        ? `<img src="${imgSrc}" alt="${p.name}" class="cart-avatar" loading="lazy"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        : "";
-      const avPh = `<div class="cart-avatar-ph" ${imgSrc ? 'style="display:none"' : ""}>${ICON.userSm}</div>`;
+      const av = p._special && iso
+        ? `<div class="cart-flag-lg"><span class="fi fi-${iso}"></span></div>`
+        : imgSrc
+          ? `<img src="${imgSrc}" alt="${p.name}" class="cart-avatar" loading="lazy"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+          : "";
+      const avPh = p._special
+        ? ""
+        : `<div class="cart-avatar-ph" ${imgSrc ? 'style="display:none"' : ""}>${ICON.userSm}</div>`;
       const dot = iso
         ? `<div class="cart-flag-dot"><span class="fi fi-${iso}"></span></div>`
         : "";
