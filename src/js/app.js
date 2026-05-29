@@ -36,6 +36,10 @@ const ICON = {
 let players = [];
 /** @type {string[]} */
 let searchIndex = [];
+/** @type {object[]} Cartas especiales pre-generadas (96: escudo + selección × 48 equipos) */
+let allSpecialCards = [];
+/** @type {string[]} Índice de búsqueda paralelo para cartas especiales */
+let specialSearchIndex = [];
 /** @type {{ millones: number, colones: number }} */
 let currentRate = loadRate();
 /** @type {{ escudo: number, seleccion: number }} */
@@ -124,6 +128,37 @@ function makeSpecialCard(teamCode, type) {
     _special: type,
     _teamAvgEUR: avg,
   };
+}
+
+/**
+ * Pre-genera los 96 objetos de cartas especiales y su índice de búsqueda.
+ * Debe llamarse después de que `players` esté poblado.
+ */
+function buildSpecialIndex() {
+  allSpecialCards = Object.keys(TEAM_COUNTRY).flatMap((code) => [
+    makeSpecialCard(code, "escudo"),
+    makeSpecialCard(code, "seleccion"),
+  ]);
+  specialSearchIndex = allSpecialCards.map((p) => {
+    const display   = normalize(TEAM_DISPLAY[p.sticker_team] || "");
+    const country   = normalize(TEAM_COUNTRY[p.sticker_team] || "");
+    const keywords  = p._special === "escudo" ? "escudo foil" : "seleccion foto";
+    return ` ${normalize(p.sticker_code)} ${normalize(p.sticker_team)} ${display} ${country} ${keywords} `;
+  });
+}
+
+/** Mismo patrón que CODE_RE en search.js — código exacto vs. substring */
+const SPECIAL_CODE_RE = /^[a-z]{2,4}\d+$/;
+
+/**
+ * Busca en el índice de cartas especiales.
+ * @param {string} query — ya normalizado
+ * @returns {object[]}
+ */
+function searchSpecial(query) {
+  const q      = normalize(query);
+  const needle = SPECIAL_CODE_RE.test(q) ? ` ${q} ` : q;
+  return allSpecialCards.filter((_, i) => specialSearchIndex[i].includes(needle));
 }
 
 /**
@@ -294,6 +329,7 @@ async function init() {
       return match ? { ...p, sticker_code: entry.code, sticker_team: entry.team } : p;
     });
     searchIndex = buildIndex(players);
+    buildSpecialIndex();
     activePool = players;
     activeIndex = searchIndex;
     loadCart(players);
@@ -337,17 +373,21 @@ function applyFilter() {
 function runQuery() {
   const query = $searchBox.value.trim();
 
+  // Branch A — sin filtro activo
   if (!activeGroup && !activeTeam) {
     if (query.length < 2) { $results.innerHTML = ""; hideResetBtn(); return; }
-    renderResults(search(query, activeIndex, activePool));
+    renderResults([...searchSpecial(query), ...search(query, activeIndex, activePool)]);
     return;
   }
 
+  // Branch B — equipo específico activo
   if (activeTeam) {
     if (query.length >= 2) {
-      renderResults(search(query, activeIndex, activePool));
+      const teamSpecials = searchSpecial(query).filter((p) => p.sticker_team === activeTeam);
+      renderResults([...teamSpecials, ...search(query, activeIndex, activePool)]);
       return;
     }
+    // Query vacío: mostrar cartas especiales + faltantes + plantel
     const matchedCodes = new Set(activePool.map((p) => p.sticker_code).filter(Boolean));
     const missing = getMissingEntries(activeTeam, matchedCodes);
     const synth = missing.map((e) => ({
@@ -369,11 +409,14 @@ function runQuery() {
     return;
   }
 
+  // Branch C — grupo activo
   if (query.length < 2) {
     $results.innerHTML = `<p class="empty-msg">Escribí un nombre para buscar dentro del Grupo ${activeGroup}.</p>`;
     return;
   }
-  renderResults(search(query, activeIndex, activePool));
+  const groupTeams    = new Set(GROUPS[activeGroup] || []);
+  const groupSpecials = searchSpecial(query).filter((p) => groupTeams.has(p.sticker_team));
+  renderResults([...groupSpecials, ...search(query, activeIndex, activePool)]);
 }
 
 
