@@ -238,6 +238,15 @@ export function initIntercambio() {
 
     viewInput.hidden = true;
     viewResults.hidden = false;
+
+    // Stagger footer elements in with spring
+    if (typeof gsap !== "undefined") {
+      gsap.fromTo(
+        [pricesBtn, copyBtn, backBtn],
+        { y: 10, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.07, duration: 0.42, ease: "back.out(2)", clearProps: "transform" }
+      );
+    }
   });
 
   backBtn.addEventListener("click", () => {
@@ -248,6 +257,13 @@ export function initIntercambio() {
   document.addEventListener("intercambio:price-response", (e) => {
     totalChip.textContent = e.detail;
     totalChip.hidden = false;
+    // Pop in with spring
+    if (typeof gsap !== "undefined") {
+      gsap.fromTo(totalChip,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.48, ease: "back.out(3)", clearProps: "transform" }
+      );
+    }
   });
 
   pricesBtn.addEventListener("click", () => {
