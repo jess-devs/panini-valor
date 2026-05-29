@@ -240,10 +240,7 @@ function removeFromCart(playerId) {
 const $overlay  = document.getElementById("overlay");
 const $loadMsg  = document.getElementById("load-msg");
 const $loadError = document.getElementById("load-error");
-const $loaderPct = document.getElementById("loader-pct");
-
-const _LOADER_CIRC = 2 * Math.PI * 52; // stroke-dasharray del anillo SVG
-const _loaderPct = { val: 0 };
+const _LOADER_CIRC = 2 * Math.PI * 52;
 const $searchBox      = document.getElementById("search");
 const $searchScanBtn  = document.querySelector(".search-scanner-btn");
 const $results = document.getElementById("results");
@@ -320,8 +317,8 @@ function initLoader() {
   gsap.from(".loader-ring", { scale: 0.6, opacity: 0, duration: 0.5, ease: "back.out(1.4)" });
   // Balón hace pop-in con spin — aparece directo en su posición
   gsap.from("#loader-ball", { scale: 0, rotation: -200, duration: 0.55, ease: "back.out(2.5)", delay: 0.18 });
-  // Porcentaje y mensaje aparecen suavemente
-  gsap.from(["#loader-pct", ".loader-msg"], { opacity: 0, y: 6, duration: 0.38, stagger: 0.08, delay: 0.32 });
+  // Mensaje aparece suavemente
+  gsap.from(".loader-msg", { opacity: 0, y: 6, duration: 0.38, delay: 0.32 });
 }
 
 /**
@@ -333,11 +330,6 @@ async function init() {
     players = await downloadAndParse((pct) => {
       const ringFill = document.getElementById("loader-ring-fill");
       gsap.to(ringFill, { strokeDashoffset: _LOADER_CIRC * (1 - pct), duration: 0.35, ease: "power1.out", overwrite: true });
-      gsap.to(_loaderPct, {
-        val: Math.round(pct * 100),
-        duration: 0.35, ease: "none", overwrite: true,
-        onUpdate: () => { if ($loaderPct) $loaderPct.textContent = Math.round(_loaderPct.val) + "%"; },
-      });
       if (pct < 0.15)      $loadMsg.textContent = "Conectando…";
       else if (pct < 0.5)  $loadMsg.textContent = "Descargando jugadores…";
       else if (pct < 0.9)  $loadMsg.textContent = "Procesando datos…";

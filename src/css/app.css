@@ -73,21 +73,6 @@ body {
   will-change: transform;
 }
 
-.loader-pct-overlay {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--color-primary);
-  font-family: "Inter", system-ui, sans-serif;
-  font-weight: 800;
-  font-size: 13px;
-  line-height: 1;
-  min-width: 36px;
-  text-align: center;
-  pointer-events: none;
-  z-index: 1;
-  letter-spacing: -0.02em;
-}
 
 .loader-msg {
   color: rgba(255, 255, 255, 0.55);
