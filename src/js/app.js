@@ -1133,4 +1133,19 @@ document.addEventListener("intercambio:lookup", (e) => {
   matched.forEach((p) => addToCart(p.player_id));
 });
 
+// Calcula el valor total de los códigos solicitados por intercambio y responde con el precio.
+document.addEventListener("intercambio:price-request", (e) => {
+  const codes = new Set(e.detail);
+  let total = 0;
+  players.forEach((p) => {
+    if (!p.sticker_code || !codes.has(p.sticker_code)) return;
+    const id = String(p.player_id);
+    const eur = p.market_value_in_eur
+      ? (editedValues.get(id) || p.market_value_in_eur)
+      : (estimatedValues.get(id) || null);
+    total += calcPrice(eur, currentRate);
+  });
+  document.dispatchEvent(new CustomEvent("intercambio:price-response", { detail: formatCRC(total) }));
+});
+
 init();

@@ -187,6 +187,7 @@ export function initIntercambio() {
   const resultBadge = document.getElementById("ix-result-badge");
   const resultPanel = resultBody.closest(".ix-result-panel");
   const pricesBtn = document.getElementById("ix-prices-btn");
+  const totalChip = document.getElementById("ix-total-chip");
 
   // Collapse toggle
   const resultHeading = resultPanel.querySelector(".ix-result-heading");
@@ -227,6 +228,14 @@ export function initIntercambio() {
     // Show "Ver precios" only when there are matches
     pricesBtn.hidden = lastResult.length === 0;
 
+    // Request price total from app.js
+    if (lastResult.length > 0) {
+      const codes = lastResult.flatMap(({ key, numbers }) => numbers.map((n) => `${key}${n}`));
+      document.dispatchEvent(new CustomEvent("intercambio:price-request", { detail: codes }));
+    } else {
+      totalChip.hidden = true;
+    }
+
     viewInput.hidden = true;
     viewResults.hidden = false;
   });
@@ -234,6 +243,11 @@ export function initIntercambio() {
   backBtn.addEventListener("click", () => {
     viewResults.hidden = true;
     viewInput.hidden = false;
+  });
+
+  document.addEventListener("intercambio:price-response", (e) => {
+    totalChip.textContent = e.detail;
+    totalChip.hidden = false;
   });
 
   pricesBtn.addEventListener("click", () => {

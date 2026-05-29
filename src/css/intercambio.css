@@ -189,7 +189,17 @@
 
 .ix-footer-row {
   display: flex;
+  align-items: center;
   gap: var(--sp-3);
+}
+
+.ix-total-chip {
+  margin-left: auto;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 /* "Ver precios" button — gold accent matching the sticker identity */
