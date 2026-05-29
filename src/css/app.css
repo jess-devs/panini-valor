@@ -618,6 +618,45 @@ main {
   animation: addBtnBounce 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* ── Special cards (escudo / selección) ─────── */
+.card--special {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef9f0 100%);
+  border: 1px solid #f3d27a;
+}
+
+.card--special:hover {
+  border-color: var(--color-gold);
+  box-shadow: 0 4px 16px rgba(196,158,32,0.15);
+}
+
+.player-placeholder--special { color: var(--color-gold); }
+
+.special-badge {
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+}
+
+.special-badge--escudo {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #78350f;
+  border: 1px solid #f3d27a;
+}
+
+.special-badge--seleccion {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.special-eur {
+  font-weight: 600;
+  color: #92400e;
+}
+
 /* ── Missing cards ───────────────────────────── */
 .card--missing {
   background: #fafbfd;
@@ -1238,6 +1277,17 @@ main {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(14,27,61,0.07);
 }
+
+.modal-section-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: var(--sp-5) 0 var(--sp-3);
+}
+
+.rate-equals--spacer { visibility: hidden; }
 
 .modal-footer {
   display: flex;

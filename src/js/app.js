@@ -13,6 +13,9 @@ import {
   formatCRC,
   formatEUR,
   DEFAULT_RATE,
+  loadMultipliers,
+  saveMultipliers,
+  DEFAULT_MULTIPLIERS,
 } from "./converter.js";
 import { openDialog, closeDialog } from "./transitions.js";
 import { GROUPS, TEAM_DISPLAY, TEAM_COUNTRY, buildChecklistMap, getMissingEntries } from "./checklist.js";
@@ -25,6 +28,8 @@ const ICON = {
   user: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   userSm: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
   pencil: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  shield: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  users: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
 };
 
 /** @type {object[]} */
@@ -33,6 +38,8 @@ let players = [];
 let searchIndex = [];
 /** @type {{ millones: number, colones: number }} */
 let currentRate = loadRate();
+/** @type {{ escudo: number, seleccion: number }} */
+let currentMultipliers = loadMultipliers();
 
 const CART_KEY = "panini_cart";
 /** @type {object[]} */
@@ -90,27 +97,68 @@ function saveCart() {
 }
 
 /**
+ * Crea un objeto de carta especial (escudo o selección) para un equipo.
+ * El _teamAvgEUR se calcula a partir del catálogo global de jugadores.
+ * @param {string} teamCode
+ * @param {"escudo"|"seleccion"} type
+ * @returns {object}
+ */
+function makeSpecialCard(teamCode, type) {
+  const teamPlayers = players.filter(
+    (p) => p.sticker_team === teamCode && p.market_value_in_eur > 0,
+  );
+  const avg = teamPlayers.length
+    ? teamPlayers.reduce((s, p) => s + p.market_value_in_eur, 0) / teamPlayers.length
+    : 0;
+  const num = type === "escudo" ? "1" : "13";
+  const label = type === "escudo" ? "Escudo FOIL" : "Foto Selección";
+  return {
+    player_id: `${teamCode}${num}`,
+    name: label,
+    sticker_code: `${teamCode}${num}`,
+    sticker_team: teamCode,
+    country_of_citizenship: TEAM_COUNTRY[teamCode],
+    position: null,
+    market_value_in_eur: null,
+    image_url: "",
+    _special: type,
+    _teamAvgEUR: avg,
+  };
+}
+
+/**
  * Restaura el carrito desde localStorage cruzando con el catálogo cargado.
  * @param {object[]} allPlayers
  */
 function loadCart(allPlayers) {
   try {
-    const ids = new Set(
-      JSON.parse(localStorage.getItem(CART_KEY) || "[]").map(String),
-    );
-    if (!ids.size) return;
-    cart = allPlayers.filter((p) => ids.has(String(p.player_id)));
+    const rawIds = JSON.parse(localStorage.getItem(CART_KEY) || "[]").map(String);
+    if (!rawIds.length) return;
+    const specials = [];
+    const playerIds = new Set();
+    for (const id of rawIds) {
+      const m = id.match(/^([A-Z]{2,3})(1|13)$/);
+      if (m && TEAM_COUNTRY[m[1]]) {
+        specials.push(makeSpecialCard(m[1], m[2] === "1" ? "escudo" : "seleccion"));
+      } else {
+        playerIds.add(id);
+      }
+    }
+    cart = [...specials, ...allPlayers.filter((p) => playerIds.has(String(p.player_id)))];
   } catch (_) {}
 }
 
 /**
- * Agrega un jugador al carrito y dispara la animación de bounce en el botón.
+ * Agrega un jugador (o carta especial) al carrito.
  * @param {string|number} playerId
  */
 function addToCart(playerId) {
   const id = String(playerId);
   if (cartIds().includes(id)) return;
-  const p = players.find((p) => String(p.player_id) === id);
+  const specialMatch = id.match(/^([A-Z]{2,3})(1|13)$/);
+  const p = specialMatch && TEAM_COUNTRY[specialMatch[1]]
+    ? makeSpecialCard(specialMatch[1], specialMatch[2] === "1" ? "escudo" : "seleccion")
+    : players.find((p) => String(p.player_id) === id);
   if (!p) return;
   cart.push(p);
   saveCart();
@@ -166,6 +214,8 @@ const $modal = document.getElementById("modal");
 const $modalClose = document.getElementById("modal-close");
 const $fMillones = document.getElementById("f-millones");
 const $fColones = document.getElementById("f-colones");
+const $fEscudo = document.getElementById("f-escudo");
+const $fSeleccion = document.getElementById("f-seleccion");
 const $saveBtn = document.getElementById("save-btn");
 const $resetBtn = document.getElementById("reset-btn");
 const $cartSection = document.getElementById("cart-section");
@@ -311,7 +361,11 @@ function runQuery() {
       image_url: "",
       player_id: null,
     }));
-    renderResults([...synth, ...activePool]);
+    const specialCards = [
+      makeSpecialCard(activeTeam, "escudo"),
+      makeSpecialCard(activeTeam, "seleccion"),
+    ];
+    renderResults([...specialCards, ...synth, ...activePool]);
     return;
   }
 
@@ -416,7 +470,11 @@ function renderResults(found) {
   }
   const inCart = new Set(cartIds());
   $results.innerHTML = found
-    .map((p) => p._missing ? missingCardHTML(p) : cardHTML(p, inCart.has(String(p.player_id))))
+    .map((p) => {
+      if (p._special) return specialCardHTML(p, inCart.has(String(p.player_id)));
+      if (p._missing) return missingCardHTML(p);
+      return cardHTML(p, inCart.has(String(p.player_id)));
+    })
     .join("");
 }
 
@@ -502,6 +560,47 @@ function missingCardHTML(p) {
 }
 
 /**
+ * Genera el HTML de una carta especial (escudo o selección).
+ * @param {object}  p     - Carta especial con _special y _teamAvgEUR.
+ * @param {boolean} added - Si ya está en el carrito.
+ * @returns {string}
+ */
+function specialCardHTML(p, added) {
+  const avgEUR = p._teamAvgEUR * currentMultipliers[p._special];
+  const price = calcPrice(avgEUR, currentRate);
+  const iso = getISO(p.country_of_citizenship);
+  const country = getCountryDisplay(p.country_of_citizenship);
+  const dot = iso
+    ? `<div class="player-flag-dot"><span class="fi fi-${iso}"></span></div>`
+    : "";
+  const badgeLabel = p._special === "escudo" ? "FOIL" : "Selección";
+
+  return `
+  <div class="card card--special">
+    <span class="sticker-code">${p.sticker_code}</span>
+    <div class="player-photo-wrap">
+      <div class="player-placeholder player-placeholder--special">${p._special === "escudo" ? ICON.shield : ICON.users}</div>
+      ${dot}
+    </div>
+    <div class="card-body">
+      <p class="player-name">${p.name}</p>
+      <div class="player-meta">
+        <span class="player-country">${country}</span>
+        <span class="special-badge special-badge--${p._special}">${badgeLabel}</span>
+      </div>
+      <div class="card-pricing">
+        <span class="player-eur special-eur">${formatEUR(avgEUR)}</span>
+        <span class="player-crc">${formatCRC(price)}</span>
+      </div>
+    </div>
+    <button class="add-btn${added ? " add-btn--added" : ""}" data-add-id="${p.player_id}"
+      title="${added ? "Ya está en tu lista" : "Agregar a mi lista"}" aria-label="${added ? "Agregado" : "Agregar"}">
+      ${added ? ICON.check : ICON.plus}
+    </button>
+  </div>`;
+}
+
+/**
  * Actualiza el botón para reflejar que el jugador fue agregado al carrito.
  * @param {HTMLButtonElement} btn
  */
@@ -558,12 +657,17 @@ function renderCart(newId = null) {
       const origMillions = hasPrice ? parseFloat((p.market_value_in_eur / 1_000_000).toFixed(3)) : 0;
       const isEditing = editingIds.has(id);
 
-      const eurForCalc = hasPrice ? (editedRaw || p.market_value_in_eur) : (estRaw || null);
+      const specialBaseEUR = p._special ? p._teamAvgEUR * currentMultipliers[p._special] : null;
+      const eurForCalc = hasPrice
+        ? (editedRaw || p.market_value_in_eur)
+        : (estRaw || specialBaseEUR || null);
       const price = calcPrice(eurForCalc, currentRate);
       subtotal += price;
 
       const country = getCountryDisplay(p.country_of_citizenship);
-      const pos = getPositionES(p.position);
+      const pos = p._special
+        ? (p._special === "escudo" ? "FOIL" : "Sel.")
+        : getPositionES(p.position);
       const iso = getISO(p.country_of_citizenship);
       const imgSrc = p.image_url || "";
 
@@ -599,19 +703,24 @@ function renderCart(newId = null) {
             <span class="crc-value${editedRaw ? " crc-edited" : ""}" data-crc-id="${id}">${formatCRC(price)}</span>
           </td>`;
       } else {
+        const specialMillions = specialBaseEUR
+          ? parseFloat((specialBaseEUR / 1_000_000).toFixed(3))
+          : 0;
+        const estPlaceholder = p._special ? specialMillions : 0;
+        const hasPriceDisplay = !!estRaw || !!specialBaseEUR;
         priceCells = `
           <td class="cell-eur est-cell">
-            <button class="est-edit-btn" data-edit-id="${id}" title="Agregar estimado" aria-label="Agregar estimado">${ICON.pencil}</button>
-            <div class="est-input-wrap" title="Ingresá el valor estimado en millones de euros">
+            <button class="est-edit-btn" data-edit-id="${id}" title="${p._special ? "Ajustar precio" : "Agregar estimado"}" aria-label="${p._special ? "Ajustar precio" : "Agregar estimado"}">${ICON.pencil}</button>
+            <div class="est-input-wrap" title="${p._special ? "Ajustá el precio en millones de euros" : "Ingresá el valor estimado en millones de euros"}">
               <span class="est-prefix">€</span>
               <input type="number" class="est-input" data-est-id="${id}"
-                placeholder="0" min="0" step="any" value="${estMillions}"
-                aria-label="Precio estimado en millones de euros para ${p.name}">
+                placeholder="${estPlaceholder}" min="0" step="any" value="${estMillions}"
+                aria-label="Precio en millones de euros para ${p.name}">
               <span class="est-suffix">M</span>
             </div>
           </td>
-          <td class="cell-crc est-price-cell${estRaw ? "" : " est-price-pending"}" data-est-price-id="${id}">
-            <button class="est-edit-mobile-btn" data-edit-id="${id}" aria-label="Agregar estimado">${ICON.pencil}</button>
+          <td class="cell-crc est-price-cell${hasPriceDisplay ? "" : " est-price-pending"}" data-est-price-id="${id}">
+            <button class="est-edit-mobile-btn" data-edit-id="${id}" aria-label="${p._special ? "Ajustar precio" : "Agregar estimado"}">${ICON.pencil}</button>
             ${formatCRC(price)}
           </td>`;
       }
@@ -699,7 +808,10 @@ function recalcSubtotal() {
     const pid = String(p.player_id);
     const est = estimatedValues.get(pid);
     const edited = editedValues.get(pid);
-    const eur = p.market_value_in_eur ? (edited || p.market_value_in_eur) : (est || null);
+    const specialBase = p._special ? p._teamAvgEUR * currentMultipliers[p._special] : null;
+    const eur = p.market_value_in_eur
+      ? (edited || p.market_value_in_eur)
+      : (est || specialBase || null);
     subtotal += calcPrice(eur, currentRate);
   });
   $cartTotal.textContent = formatCRC(subtotal);
@@ -803,6 +915,8 @@ $modal.addEventListener("click", (e) => {
 function openModal() {
   $fMillones.value = currentRate.millones;
   $fColones.value = currentRate.colones;
+  $fEscudo.value = currentMultipliers.escudo;
+  $fSeleccion.value = currentMultipliers.seleccion;
   $modal.classList.remove("hidden", "modal-closing");
   $fMillones.focus();
 }
@@ -821,12 +935,16 @@ function closeModal() {
 $saveBtn.addEventListener("click", () => {
   const m = parseFloat($fMillones.value);
   const c = parseFloat($fColones.value);
-  if (!m || !c || m <= 0 || c <= 0) {
+  const me = parseFloat($fEscudo.value);
+  const ms = parseFloat($fSeleccion.value);
+  if (!m || !c || m <= 0 || c <= 0 || !me || !ms || me <= 0 || ms <= 0) {
     alert("Los valores deben ser números positivos.");
     return;
   }
   currentRate = { millones: m, colones: c };
+  currentMultipliers = { escudo: me, seleccion: ms };
   saveRate(currentRate);
+  saveMultipliers(currentMultipliers);
   closeModal();
   runQuery();
   renderCart();
@@ -835,6 +953,8 @@ $saveBtn.addEventListener("click", () => {
 $resetBtn.addEventListener("click", () => {
   $fMillones.value = DEFAULT_RATE.millones;
   $fColones.value = DEFAULT_RATE.colones;
+  $fEscudo.value = DEFAULT_MULTIPLIERS.escudo;
+  $fSeleccion.value = DEFAULT_MULTIPLIERS.seleccion;
 });
 
 // ── Sort ────────────────────────────────────────────────
@@ -842,6 +962,7 @@ let cartSortMode = "default";
 
 function getEffectiveEUR(p) {
   const id = String(p.player_id);
+  if (p._special) return estimatedValues.get(id) || (p._teamAvgEUR * currentMultipliers[p._special]);
   if (p.market_value_in_eur) return editedValues.get(id) || p.market_value_in_eur;
   return estimatedValues.get(id) || 0;
 }

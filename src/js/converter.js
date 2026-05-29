@@ -3,6 +3,11 @@ export const DEFAULT_RATE = { millones: 10, colones: 100 };
 
 const STORAGE_KEY = "panini_rate";
 
+/** @type {{ escudo: number, seleccion: number }} */
+export const DEFAULT_MULTIPLIERS = { escudo: 1.5, seleccion: 1.0 };
+
+const MULTIPLIERS_KEY = "panini_multipliers";
+
 /**
  * Lee la tasa guardada en localStorage.
  * @returns {{ millones: number, colones: number }}
@@ -24,6 +29,29 @@ export function loadRate() {
  */
 export function saveRate(rate) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(rate));
+}
+
+/**
+ * Lee los multiplicadores de cartas especiales desde localStorage.
+ * @returns {{ escudo: number, seleccion: number }}
+ */
+export function loadMultipliers() {
+  try {
+    const saved = localStorage.getItem(MULTIPLIERS_KEY);
+    if (saved) {
+      const m = JSON.parse(saved);
+      if (m.escudo > 0 && m.seleccion > 0) return m;
+    }
+  } catch (_) {}
+  return { ...DEFAULT_MULTIPLIERS };
+}
+
+/**
+ * Persiste los multiplicadores en localStorage.
+ * @param {{ escudo: number, seleccion: number }} m
+ */
+export function saveMultipliers(m) {
+  localStorage.setItem(MULTIPLIERS_KEY, JSON.stringify(m));
 }
 
 /**
